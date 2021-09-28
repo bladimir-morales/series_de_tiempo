@@ -33,7 +33,7 @@ El periodo a ser tomado en cuenta es desde el primer trimestre de 1991 hasta el 
 
 ## Fuente de datos
 
-Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al PIB en serie histórica con precios constantes y corrientes. En este contexto también se cuenta con los datos de la incidencia en el PIB boliviano desde el año 1991 en el caso trimestral y desde 1980 para el caso anual^[ [INE-series de tiempo](https://www.ine.gob.bo/index.php/estadisticas-economicas/pib-y-cuentas-nacionales/producto-interno-bruto-trimestral/producto-interno-bruto-trimestral-intro/#1604584724125-615aec14-e917)].
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al PIB en serie histórica con precios constantes y corrientes. En este contexto también se cuenta con los datos de la incidencia en el PIB boliviano desde el año 1991 en el caso trimestral y desde 1980 para el caso anual^[ [INE-series de tiempo, PIB](https://www.ine.gob.bo/index.php/estadisticas-economicas/pib-y-cuentas-nacionales/producto-interno-bruto-trimestral/producto-interno-bruto-trimestral-intro/#1604584724125-615aec14-e917)].
 
 ## Gráfico de la serie
 
@@ -43,7 +43,6 @@ En el siguiente gráfico se muestra la serie de tiempo de la incidencia del PIB 
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/incidencia_pib_trim_91_20.txt"
 pib<-read.table(url,head=T)
 
-#pib<-read.table("data/incidencia_pib_trim_91_20.txt",head=T)
 #Serie de tiempo
 serie_pib<-ts(pib,start = c(1991,1),frequency = 4)
 ```
@@ -54,6 +53,13 @@ plot(serie_pib,main="Incidencia trimestral del PIB a precios constantes\n Bolivi
      xlab="Gestión",ylab="Incidencia PIB")
 
 ```
+
+Esta serie de tiempo al hacer un análisis visual presumiblemente tendrá el siguiente comportamiento:
+
+* Media constante.
+* Varianza constante.
+
+Obs. No cuenta con tendencia, estacionalidad y comportamiento ciclico.
 
 ## Datos de entrenamiento y de test
 
@@ -107,8 +113,21 @@ qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals)
 ```
 
 
-# Serie 2. 
+# Serie 2. Indice mensual de consumo de agua potable
 
+## Introducción 
+
+
+## Datos
+
+
+## Fuente de datos
+
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al indice mensual de consumo de servicios básicos por tipo de servicio en serie histórica según año y mes. En este contexto se cuenta con los datos del consumo de agua potable desde enero de 1990 hasta julio del 2021^[ [INE-series de tiempo, servicios básicos](https://www.ine.gob.bo/index.php/estadisticas-economicas/servicios-basicos-cuadros-estadisticos/)].
+
+## Gráfico de la serie
+
+En el siguiente gráfico se muestra la serie de tiempo del indice del consumo de agua potable en Bolivia en los periodos comprendidos desde enero de 1990 hasta julio del 2021, teniendo en total 379 observaciones.
 
 ```{r}
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de agua potable_mes_90_21.txt"
@@ -119,11 +138,57 @@ serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
 
 
 ```{r}
-plot(serie_agua,main="Indice mensual de consumo de agua base 1990=100\n Bolivia (Ene 1990 a Julio 2021)",
-     xlab="Gestión",ylab="Indice de consumo de agua")
+plot(serie_agua,main="Indice mensual de consumo de agua potable base 1990=100\n Bolivia (Enero 1990 a Julio 2021)",
+     xlab="Gestión",ylab="Indice de consumo de agua potable")
 ```
 
+Esta serie de tiempo al hacer un análisis visual probablemente tendrá el siguiente comportamiento:
+
+* Media constante.
+* Varianza constante.
+* Tendencia creciente.
+
+Obs. No cuenta con estacionalidad y comportamiento cíclico.
+
+## Datos de entrenamiento y de test
+
+
+La serie para efectos de práctica se dividirá en dos:
+
+* Datos de entrenamiento que estarán comprendidos en los periodos de: 
+  - Enero de 1990 a diciembre de 2020. (372 datos). 
+
+```{r}
+serie_agua_ent<-ts(agua[1:372,],start = c(1990,1),frequency = 12)
+serie_agua_ent
+```
+
+* Datos de test que estarán comprendidos en los periodos de: 
+  - Enero de 2021 a julio de 2021. (7 datos).
+  
+```{r}
+serie_agua_test<-ts(agua[373:379,],start = c(2021,1),frequency = 12)
+serie_agua_test
+```
+
+
+## Estimación
+
+
 # Serie 3. IGAE 
+
+
+## Introducción 
+
+## Datos
+
+## Fuente de datos
+
+## Gráfico de la serie
+
+## Datos de entrenamiento y de test
+
+## Estimación
 
 ```{r}
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/igae_mes_08_21.txt"
@@ -138,3 +203,29 @@ plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (E
      xlab="Gestión",ylab="IGAE")
 ```
 
+# Serie 4. Exportaciones
+
+
+## Introducción 
+
+## Datos
+
+## Fuente de datos
+
+## Gráfico de la serie
+
+## Datos de entrenamiento y de test
+
+## Estimación
+```{r}
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/exportaciones_mes_92_21.txt"
+igae<-read.table(url,head=T)
+
+serie_igae<-ts(igae,start = c(1992,1),frequency = 12)
+```
+
+
+```{r}
+plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (Ene 2008 a Julio 2021)",
+     xlab="Gestión",ylab="IGAE")
+```
