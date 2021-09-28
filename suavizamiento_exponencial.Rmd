@@ -26,14 +26,13 @@ El Producto Interno Bruto (PIB), es es un indicador que nació en una de las peo
 
 ## Datos
 
-La serie de tiempo a estudiar es la incidencia en el Producto Interno Bruto (PIB) de Bolivia a precios constantes trimestrales, que es calculado a partir del PIB a precios constantes, con la siguiente formula:
+La serie de tiempo a estudiar es la incidencia en el Producto Interno Bruto (PIB) de Bolivia a precios constantes trimestrales, que es calculado a partir del PIB a precios constantes.
 
-$$Incidencia_{PIB}=$$
 El periodo a ser tomado en cuenta es desde el primer trimestre de 1991 hasta el primer trimestre del 2020, teniendo 117 observaciones.
 
 ## Fuente de datos
 
-Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al PIB en serie histórica con precios constantes y corrientes. En este contexto también se cuenta con los datos de la incidencia en el PIB boliviano desde el año 1991 en el caso trimestral y desde 1980 para el caso anual^[ [INE-series de tiempo, PIB](https://www.ine.gob.bo/index.php/estadisticas-economicas/pib-y-cuentas-nacionales/producto-interno-bruto-trimestral/producto-interno-bruto-trimestral-intro/#1604584724125-615aec14-e917)].
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE), esta publicada la información referente al PIB en serie histórica con precios constantes y corrientes. En este contexto también se cuenta con los datos de la incidencia en el PIB boliviano desde el año 1991 en el caso trimestral y desde 1980 para el caso anual (https://www.ine.gob.bo/index.php/estadisticas-economicas/pib-y-cuentas-nacionales/producto-interno-bruto-trimestral/producto-interno-bruto-trimestral-intro/#1604584724125-615aec14-e917).
 
 ## Gráfico de la serie
 
@@ -84,7 +83,9 @@ serie_pib_test
   
 ## Estimación
 
-** **
+### Suavizamiento exponencial simple
+
+**Modelo**
 
 ```{r}
 mod1_serie_pib<-HoltWinters(serie_pib_ent,beta=FALSE,gamma = FALSE)
@@ -95,35 +96,98 @@ mod1_serie_pib
 plot(mod1_serie_pib)
 ```
 
-```{r}
-mod1_serie_pib$SSE
+**Medida de calidad de ajuste**
 
+```{r}
+PE<-abs((mod1_serie_pib$x-mod1_serie_pib$fitted)/mod1_serie_pib$x)
+MAPE<-sum(PE)/length(PE)
+MAPE*100
 ```
+
+**Predicción**
 
 ```{r}
 mod1_serie_pib_pred<-forecast(mod1_serie_pib,h=5)
+mod1_serie_pib_pred
+```
+
+
+```{r}
 plot(mod1_serie_pib_pred)
 lines(mod1_serie_pib_pred$fitted,col="red")
 ```
 
+**Análisis de residuos**
 
 ```{r}
 hist(mod1_serie_pib_pred$residuals)
-qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals)
 ```
 
+
+```{r}
+qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals,main="QQ-plot")
+```
+
+### Suavizamiento exponencial doble
+
+**Modelo**
+
+```{r}
+mod2_serie_pib<-HoltWinters(serie_pib_ent,gamma = FALSE)
+mod2_serie_pib
+```
+
+```{r}
+plot(mod2_serie_pib)
+```
+
+**Medida de calidad de ajuste**
+
+```{r}
+PE<-abs((mod2_serie_pib$x-mod2_serie_pib$fitted)/mod2_serie_pib$x)
+MAPE<-sum(PE)/length(PE)
+MAPE*100
+```
+
+**Predicción**
+
+```{r}
+mod2_serie_pib_pred<-forecast(mod2_serie_pib,h=5)
+mod2_serie_pib_pred
+```
+
+
+```{r}
+plot(mod2_serie_pib_pred)
+lines(mod2_serie_pib_pred$fitted,col="red")
+```
+
+**Análisis de residuos**
+
+```{r}
+hist(mod2_serie_pib_pred$residuals)
+```
+
+
+```{r}
+qqplot(mod2_serie_pib_pred$x,mod2_serie_pib_pred$residuals,main="QQ-plot")
+```
 
 # Serie 2. Indice mensual de consumo de agua potable
 
 ## Introducción 
 
+El indice de consumo de agua potable, es un indicador que nos permite conocer la evolución y comportamiento del consumo de agua potable de los sectores privado y público.
 
 ## Datos
 
+El periodo a ser tomado en cuenta es desde enero de 1990 hasta julio del 2021, teniendo 379 observaciones en total. Este indicador se establece con un año base que en este caso es 1990 en el cual se iguala el consumo de agua potable a 100, a partir de este registro se calcula el aumento o decremento posterior al año base.
 
 ## Fuente de datos
 
-Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al indice mensual de consumo de servicios básicos por tipo de servicio en serie histórica según año y mes. En este contexto se cuenta con los datos del consumo de agua potable desde enero de 1990 hasta julio del 2021^[ [INE-series de tiempo, servicios básicos](https://www.ine.gob.bo/index.php/estadisticas-economicas/servicios-basicos-cuadros-estadisticos/)].
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al indice mensual de consumo de servicios básicos por tipo de servicio en serie histórica según año y mes. En este contexto se cuenta con los datos del consumo de agua potable desde enero de 1990 hasta julio del 2021 (https://www.ine.gob.bo/index.php/estadisticas-economicas/servicios-basicos-cuadros-estadisticos/).
+
+Los metadatos están disponibles en el Catálogo del Archivo Nacional de Datos (ANDA) del INE (http://anda4.ine.gob.bo/ANDA4_2/index.php/catalog/254).
 
 ## Gráfico de la serie
 
@@ -152,7 +216,6 @@ Obs. No cuenta con estacionalidad y comportamiento cíclico.
 
 ## Datos de entrenamiento y de test
 
-
 La serie para efectos de práctica se dividirá en dos:
 
 * Datos de entrenamiento que estarán comprendidos en los periodos de: 
@@ -171,24 +234,137 @@ serie_agua_test<-ts(agua[373:379,],start = c(2021,1),frequency = 12)
 serie_agua_test
 ```
 
-
 ## Estimación
 
+### Suavizamiento exponencial doble
 
-# Serie 3. IGAE 
+**Modelo**
+
+```{r}
+mod1_serie_agua<-HoltWinters(serie_agua_ent,gamma = FALSE)
+mod1_serie_agua
+```
+
+```{r}
+plot(mod1_serie_agua)
+```
+
+**Medida de calidad de ajuste**
+
+```{r}
+PE<-abs((mod1_serie_agua$x-mod1_serie_agua$fitted)/mod1_serie_agua$x)
+MAPE<-sum(PE)/length(PE)
+MAPE*100
+```
+
+**Predicción**
+
+```{r}
+mod1_serie_agua_pred<-forecast(mod1_serie_agua,h=5)
+mod1_serie_agua_pred
+```
+
+
+```{r}
+plot(mod1_serie_agua_pred)
+lines(mod1_serie_agua_pred$fitted,col="red")
+```
+
+**Análisis de residuos**
+
+```{r}
+hist(mod1_serie_agua_pred$residuals)
+```
+
+
+```{r}
+qqplot(mod1_serie_agua_pred$x,mod1_serie_agua_pred$residuals,main="QQ-plot")
+```
+
+### Suavizamiento exponencial triple
+
+**Modelo**
+
+```{r}
+mod2_serie_agua<-HoltWinters(serie_agua_ent)
+mod2_serie_agua
+```
+
+```{r}
+plot(mod2_serie_agua)
+```
+
+**Medida de calidad de ajuste**
+
+```{r}
+PE<-abs((mod2_serie_agua$x-mod2_serie_agua$fitted)/mod2_serie_agua$x)
+MAPE<-sum(PE)/length(PE)
+MAPE*100
+```
+
+**Predicción**
+
+```{r}
+mod2_serie_agua_pred<-forecast(mod2_serie_agua,h=5)
+mod2_serie_agua_pred
+```
+
+
+```{r}
+plot(mod2_serie_agua_pred)
+lines(mod2_serie_agua_pred$fitted,col="red")
+```
+
+**Análisis de residuos**
+
+```{r}
+hist(mod2_serie_agua_pred$residuals)
+```
+
+
+```{r}
+qqplot(mod2_serie_agua_pred$x,mod1_serie_agua_pred$residuals,main="QQ-plot")
+```
+
+# Serie 3. Indice Global de Actividad Económica IGAE 
 
 
 ## Introducción 
 
+El IGAE tiene como objetivo estimar la evolución temporal del ritmo de crecimiento mensual de la actividad económica nacional en el inmediato plazo, con la finalidad de facilitar la toma de decisiones en el diseño y monitoreo de las Políticas Económicas de corto plazo.
+
+El IGAE al ser una estimación del comportamiento sobre la evolución del PIB
+trimestral mediante indicadores de referencia y métodos de desagregación
+temporal, el tratamiento aplicado a cada actividad difiere según las características
+de la serie de referencia de cada actividad, así como también por la disponibilidad
+de fuentes de información.
+
+
 ## Datos
+
+El IGAE se constituye en un indicador próximo a la evolución temporal del valor
+agregado, a partir de series de referencia disponibles mensualmente.
+
+Para que la estimación mensual no se desvié de la evolución temporal del PIB trimestral
+(Valor Agregado Bruto), las series mensuales por actividad económica son ajustadas a
+las series trimestrales del PIB, utilizando la técnica de los métodos de desagregación
+temporal.
+
+En concreto en todas las series ajustadas al PIB trimestral se utiliza el método de
+desagregación temporal de Denton y de Fernandez.
+
+El IGAE es un indicador que aplica la fórmula matemática del Índice de Laspeyres, con
+ponderaciones fijas del año base 1990 para la agregación de los índices por actividad
+económica, próximos a la evolución del PIB, las mismas que consideran el periodo base
+de las Cuentas Nacionales de Bolivia. Toda la metodología puede ser encontrada en el siguiente enlace (https://www.ine.gob.bo/index.php/descarga/407/igae/46158/metodologia-de-cuentas-nacionales-indice-global-de-la-actividad-economica-1990.pdf)
+
+El periodo a ser tomado en cuenta es desde enero del 2008 a julio 2021, teniendo 163 observaciones.
 
 ## Fuente de datos
 
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE), esta publicada la información referente al IAGE en serie histórica a partir de enero del 2008 a julio del 2021, esta informacion puede ser descargada en el siguiente enlace (https://www.ine.gob.bo/index.php/estadisticas-economicas/indice-global-de-actividad-economica-igae/#1584545313102-06cf787f-a790).
+
 ## Gráfico de la serie
-
-## Datos de entrenamiento y de test
-
-## Estimación
 
 ```{r}
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/igae_mes_08_21.txt"
@@ -203,6 +379,30 @@ plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (E
      xlab="Gestión",ylab="IGAE")
 ```
 
+
+## Datos de entrenamiento y de test
+
+La serie para efectos de práctica se dividirá en dos:
+
+* Datos de entrenamiento que estarán comprendidos en los periodos de: 
+  - Enero de 2008 a diciembre de 2020. (156 datos). 
+
+```{r}
+serie_igae_ent<-ts(agua[1:156,],start = c(2008,1),frequency = 12)
+serie_igae_ent
+```
+
+* Datos de test que estarán comprendidos en los periodos de: 
+  - Enero de 2021 a julio de 2021. (7 datos).
+  
+```{r}
+serie_igae_test<-ts(agua[157:163,],start = c(2021,1),frequency = 12)
+serie_igae_test
+```
+
+## Estimación
+
+
 # Serie 4. Exportaciones
 
 
@@ -214,18 +414,20 @@ plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (E
 
 ## Gráfico de la serie
 
+```{r}
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/exportaciones_mes_92_21.txt"
+exportacion<-read.table(url,head=T)
+
+serie_exportacion<-ts(exportacion,start = c(1992,1),frequency = 12)
+```
+
+
+```{r}
+plot(serie_exportacion,main="Indice global de la actividad económica IGAE\n Bolivia (Ene 2008 a Julio 2021)",
+     xlab="Gestión",ylab="IGAE")
+```
+
 ## Datos de entrenamiento y de test
 
 ## Estimación
-```{r}
-url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/exportaciones_mes_92_21.txt"
-igae<-read.table(url,head=T)
 
-serie_igae<-ts(igae,start = c(1992,1),frequency = 12)
-```
-
-
-```{r}
-plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (Ene 2008 a Julio 2021)",
-     xlab="Gestión",ylab="IGAE")
-```
