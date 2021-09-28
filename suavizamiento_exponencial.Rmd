@@ -50,7 +50,7 @@ serie_pib<-ts(pib,start = c(1991,1),frequency = 4)
 
 
 ```{r}
-plot(serie_pib,main="Incidencia del PIB a precios constantes\n Bolivia (I-1990 a I-2020)",
+plot(serie_pib,main="Incidencia trimestral del PIB a precios constantes\n Bolivia (I - 1991 a I - 2020)",
      xlab="Gestión",ylab="Incidencia PIB")
 
 ```
@@ -121,7 +121,7 @@ serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
 
 
 ```{r}
-plot(serie_pib,main="Incidencia del PIB a precios constantes\n Bolivia (I-1990 a I-2020)",
-     xlab="Gestión",ylab="Incidencia PIB")
+plot(serie_agua,main="Indice mensual de consumo de agua base 1990=100\n Bolivia (Ene 1990 a Julio 2021)",
+     xlab="Gestión",ylab="Indice de consumo de agua")
 
 ```
