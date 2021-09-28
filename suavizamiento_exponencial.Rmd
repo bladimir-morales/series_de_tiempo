@@ -114,8 +114,6 @@ qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals)
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de agua potable_mes_90_21.txt"
 agua<-read.table(url,head=T)
 
-#pib<-read.table("data/incidencia_pib_trim_91_20.txt",head=T)
-#Serie de tiempo
 serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
 ```
 
@@ -123,5 +121,20 @@ serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
 ```{r}
 plot(serie_agua,main="Indice mensual de consumo de agua base 1990=100\n Bolivia (Ene 1990 a Julio 2021)",
      xlab="Gestión",ylab="Indice de consumo de agua")
-
 ```
+
+# Serie 3. IGAE 
+
+```{r}
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/igae_mes_08_21.txt"
+igae<-read.table(url,head=T)
+
+serie_igae<-ts(igae,start = c(2008,1),frequency = 12)
+```
+
+
+```{r}
+plot(serie_igae,main="Indice global de la actividad económica IGAE\n Bolivia (Ene 2008 a Julio 2021)",
+     xlab="Gestión",ylab="IGAE")
+```
+
