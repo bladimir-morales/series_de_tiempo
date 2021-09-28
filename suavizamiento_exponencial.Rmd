@@ -1,27 +1,127 @@
 ---
-title: "Suavizamiento exponencial"
+title: "Suavizamiento exponencial y medias móviles"
 subtitle: "Series de Tiempo"
 author: "Bladimir Morales Torrez"
 date: "Septiembre 2021"
-output: html_document
+output: 
+  html_document:
+    number_sections: true
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(rvest)
+#library(rvest)
 library(tseries)
+library(forecast)
 ```
 
-```{r}
+# Serie 1. Incidencia en el Producto Interno Bruto (PIB)
 
+## Introducción
+
+El Producto Interno Bruto (PIB), es es un indicador que nació en una de las peores etapas que sufrió la economía mundial en 1934. En esta época debido al denominado *CRACK*^[Caída del mercado de valores en la historia de la Bolsa en Estados Unidos, teniendo un alcance global y una larga duración de sus secuelas.] de 1929, donde existía una recesión mundial que afectaba a todos los países desarrollados, el economista Simon Kuznets presentó un informe al Congreso de los Estados Unidos cuyo título fue ``Ingreso Nacional 1929-1932'', en ese informe se desarrollo por primera vez el concepto del PIB, que se presentó como indicador para medir los ingresos de la economía de un país^[ https://www.deudaexterna.es/quien-invento-el-producto-interior-bruto-pib/].
+
+
+## Datos
+
+La serie de tiempo a estudiar es la incidencia en el Producto Interno Bruto (PIB) de Bolivia a precios constantes trimestrales, que es calculado a partir del PIB a precios constantes, con la siguiente formula:
+
+$$Incidencia_{PIB}=$$
+El periodo a ser tomado en cuenta es desde el primer trimestre de 1991 hasta el primer trimestre del 2020, teniendo 117 observaciones.
+
+## Fuente de datos
+
+Para el caso de Bolivia en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[https://www.ine.gob.bo/], esta publicada la información referente al PIB en serie histórica con precios constantes y corrientes. En este contexto también se cuenta con los datos de la incidencia en el PIB boliviano desde el año 1991 en el caso trimestral y desde 1980 para el caso anual^[ [INE-series de tiempo](https://www.ine.gob.bo/index.php/estadisticas-economicas/pib-y-cuentas-nacionales/producto-interno-bruto-trimestral/producto-interno-bruto-trimestral-intro/#1604584724125-615aec14-e917)].
+
+## Gráfico de la serie
+
+En el siguiente gráfico se muestra la serie de tiempo de la incidencia del PIB boliviano en los periodos comprendidos desde el primer trimestre de 1991 hasta el primer trimestre del 2020, teniendo en total 117 observaciones.
+
+```{r}
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/incidencia_pib_trim_91_20.txt"
 pib<-read.table(url,head=T)
 
 #pib<-read.table("data/incidencia_pib_trim_91_20.txt",head=T)
 #Serie de tiempo
-spib<-ts(pib,start = c(1991,1),frequency = 4)
-plot(spib)
+serie_pib<-ts(pib,start = c(1991,1),frequency = 4)
 ```
 
+
+```{r}
+plot(serie_pib,main="Incidencia del PIB a precios constantes\n Bolivia (I-1990 a I-2020)",
+     xlab="Gestión",ylab="Incidencia PIB")
+
+```
+
+## Datos de entrenamiento y de test
+
+La serie para efectos de práctica se dividirá en dos:
+
+* Datos de entrenamiento que estarán comprendidos en los periodos de: 
+  -   Primer trimestre de 1991 a cuarto trimestre de 2018. (112 datos). 
+
+```{r}
+serie_pib_ent<-ts(pib[1:112,],start = c(1991,1),frequency = 4)
+serie_pib_ent
+```
+
+* Datos de test que estarán comprendidos en los periodos de: 
+  -   Primer trimestre de 2019 a primer trimestre de 2020. (5 datos).
+  
+```{r}
+serie_pib_test<-ts(pib[113:117,],start = c(2019,1),frequency = 4)
+serie_pib_test
+```
+
+  
+## Estimación
+
+** **
+
+```{r}
+mod1_serie_pib<-HoltWinters(serie_pib_ent,beta=FALSE,gamma = FALSE)
+mod1_serie_pib
+```
+
+```{r}
+plot(mod1_serie_pib)
+```
+
+```{r}
+mod1_serie_pib$SSE
+
+```
+
+```{r}
+mod1_serie_pib_pred<-forecast(mod1_serie_pib,h=5)
+plot(mod1_serie_pib_pred)
+lines(mod1_serie_pib_pred$fitted,col="red")
+```
+
+
+```{r}
+hist(mod1_serie_pib_pred$residuals)
+qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals)
+```
+
+
+# Serie 2. 
+
+
+```{r}
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de agua potable_mes_90_21.txt"
+agua<-read.table(url,head=T)
+
+#pib<-read.table("data/incidencia_pib_trim_91_20.txt",head=T)
+#Serie de tiempo
+serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
+```
+
+
+```{r}
+plot(serie_pib,main="Incidencia del PIB a precios constantes\n Bolivia (I-1990 a I-2020)",
+     xlab="Gestión",ylab="Incidencia PIB")
+
+```
