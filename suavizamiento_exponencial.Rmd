@@ -1,30 +1,24 @@
 ---
 title: "Suavizamiento exponencial"
+subtitle: "Series de Tiempo"
 author: "Bladimir Morales Torrez"
-date: "28/9/2021"
+date: "Septiembre 2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(tseries)
 ```
 
-## R Markdown
+```{r}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/incidencia_pib_trim_91_20.txt"
+pib<-read.csv(url)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+names(pib)<-"incidencia_pib"
 
-```{r cars}
-summary(cars)
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
