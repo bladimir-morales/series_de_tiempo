@@ -15,10 +15,11 @@ library(tseries)
 ```{r}
 
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/incidencia_pib_trim_91_20.txt"
-pib<-read.csv(url)
+pib<-read.table(url,head=T)
 
-names(pib)<-"incidencia_pib"
-
-
+#pib<-read.table("data/incidencia_pib_trim_91_20.txt",head=T)
+#Serie de tiempo
+spib<-ts(pib,start = c(1991,1),frequency = 4)
+plot(spib)
 ```
 
