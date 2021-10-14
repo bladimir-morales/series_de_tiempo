@@ -252,6 +252,10 @@ plot(mod1_serie_agua)
 **Medida de calidad de ajuste**
 
 ```{r}
+mod1_serie_agua$SSE
+```
+
+```{r}
 PE<-abs((mod1_serie_agua$x-mod1_serie_agua$fitted)/mod1_serie_agua$x)
 MAPE<-sum(PE)/length(PE)
 MAPE*100
@@ -295,6 +299,10 @@ plot(mod2_serie_agua)
 ```
 
 **Medida de calidad de ajuste**
+
+```{r}
+mod2_serie_agua$SSE
+```
 
 ```{r}
 PE<-abs((mod2_serie_agua$x-mod2_serie_agua$fitted)/mod2_serie_agua$x)
@@ -423,8 +431,8 @@ serie_exportacion<-ts(exportacion,start = c(1992,1),frequency = 12)
 
 
 ```{r}
-plot(serie_exportacion,main="Indice global de la actividad económica IGAE\n Bolivia (Ene 2008 a Julio 2021)",
-     xlab="Gestión",ylab="IGAE")
+plot(serie_exportacion,main="Exportaciones de Bolivia en Millones de Bolivianos \n Bolivia (Ene 2008 a Julio 2021)",
+     xlab="Gestión",ylab="MM bolivianos")
 ```
 
 ## Datos de entrenamiento y de test
