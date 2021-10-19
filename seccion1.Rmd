@@ -1,0 +1,165 @@
+
+
+# Variación del Indice de Extracción del Petróleo
+
+
+## Descripción 
+
+### Datos
+
+La serie de tiempo que se estudiará en esta sección es la variación del indice de cantidad de extracción del petróleo respecto al periodo anterior. Esta variación es obtenida a partir del indice de cantidad de extracción de petróleo, del cual se tendrá más detalles en la siguiente sección. 
+
+Se puede obtener este indice con la siguiente fórmula:
+
+$$VICEP_i=\frac{ICEP_i-ICEP_{i-1}}{ICEP_{i-1}}$$
+
+Donde:  
+
+- $VICEP_i$: la variación del indice de cantidad de extracción del petróleo del periodo i-ésimo.
+- $ICEP_i$: el indice de cantidad de extracción del petróleo del periodo i-ésimo.
+- $ICEP_{i-1}$: el indice de cantidad de extracción del petróleo del periodo anterior al i-ésimo.
+
+
+### Periodo de estudio
+
+La serie de tiempo esta con periodicidad mensual, comprendidos desde enero de 1991 hasta julio de 2021, teniendo en total 367 observaciones.
+
+### Fuente de datos
+
+La información respecto a la serie de tiempo se puede encontrar en la página oficial del Instituto Nacional de Estadística de Bolivia (INE)^[www.ine.gob.bo], sección de "Estadísticas Económicas" y subsección "Hidrocarburos/Minería". Específicamente se puede descargar la serie de tiempo en formato excel del siguiente enlace: (https://nube.ine.gob.bo/index.php/s/Xdx6UYu8UxyJ4tA/download).
+
+## Gráfico
+
+Se puede observar en el siguiente gráfico la serie de tiempo con periodicidad mensual desde enero de 1991 hasta julio de 2021.
+
+```{r}
+vicep<-read_xlsx("./data/bd.xlsx",sheet = "indice_extraccion")
+vicep_serie<-ts(vicep$gas_natural,start = c(1990,1),frequency = 12,names="VICEP")
+
+plot(vicep_serie,
+     main="Variación del indice de cantidad de extracción del petróleo \n Bolivia: enero 1991 a julio 2021",
+     xlab="Años",ylab="VICEP")
+```
+
+
+```{r}
+dygraph(vicep_serie , 
+        main="Variación del indice de cantidad de extracción del petróleo",
+        xlab="Años",ylab="VICEP") %>% 
+  dySeries(label="VICEP") %>% 
+  dyLegend(show = "follow") %>% 
+  dyOptions(drawGrid = F,colors = "#0A9E93",axisLineColor = "#868383") %>% 
+  dyRangeSelector() %>% 
+  dyCrosshair(direction = "vertical") %>% 
+  dyHighlight(highlightSeriesBackgroundAlpha =  0.5) 
+```
+
+Observando visualmente la serie de tiempo se puede ver que no tiene un efecto de tendencia y para verificar si cuenta con estacionalidad se hará un algunas pruebas visuales con las que cuenta el software R.
+
+```{r}
+seasonplot(vicep_serie)
+monthplot(vicep_serie)
+```
+
+
+## Datos de entrenamiento y test
+
+Para efectos de poder obtener un modelo de suavizamiento óptimo y lo más preciso posible, se dividirá la serie de tiempo en dos, los cuales son:
+
+* Datos de entrenamiento: 
+
+Se tomará en cuenta los datos desde enero de 1991 hasta diciembre de 2019.
+
+```{r}
+vicep_serie_ent<-ts(vicep$gas_natural,start = c(1990,1),end = c(2019,12), frequency=12)
+```
+
+* Datos de test.
+
+Se tomará en cuenta los datos desde enero de 2020 hasta julio de 2021.
+
+```{r}
+vicep_serie_test<-ts(vicep$gas_natural[361:379],start = c(2020,1), frequency=12)
+```
+
+## Estimación
+
+Se estimaran dos modelos posibles para el conjunto de datos de entrenamiento, tomando en cuenta que nuestra serie de tiempo como se pudo concluir tiene tendencia aditiva y posiblemente no tiene estacionalidad.
+
+### Modelo 1
+
+Para este primer modelo, se estimarán los datos con el método de Holt dos parámetros o también llamado suavizamiento exponencial doble, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente no tiene estacionalidad. 
+
+La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
+
+```{r}
+mod1_vicep_serie_ent<-HoltWinters(vicep_serie_ent,gamma = F)
+mod1_vicep_serie_ent
+
+
+```
+
+### Modelo 2
+
+Para este segundo modelo, se estimarán los datos con el método de Holt-Winters o también llamado suavizamiento exponencial triple, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente estacionalidad.
+
+La estimación se hará estimando tres parámetros de suavizamiento $\alpha$, $\beta$ y $\gamma$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$, $\beta$ y $\gamma$.
+
+```{r}
+mod2_vicep_serie_ent<-HoltWinters(vicep_serie_ent)
+mod2_vicep_serie_ent
+```
+
+
+## MSE y MAPE
+
+Se calculará el cuadrado medio del error MSE y el Porcentaje de error absoluto medio MAPE, para ambos modelos.
+
+### Cuadrado Medio del Error MSE
+
+**Modelo 1. Modelo Holt dos parámetros**
+
+```{r}
+mse1<-mod1_vicep_serie_ent$SSE/length(mod1_vicep_serie_ent$x)
+```
+
+Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse1`
+
+**Modelo 2. Modelo Holt-Winters**
+
+```{r}
+mse2<-mod2_vicep_serie_ent$SSE/length(mod1_vicep_serie_ent$x)
+```
+
+Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse2`
+
+### Porcentaje de error absoluto medio MAPE
+
+**Modelo 1. Modelo Holt dos parámetros**
+
+```{r}
+mape1<-mape(mod1_vicep_serie_ent$x,mod1_vicep_serie_ent$fitted[,1])
+```
+
+Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape1`
+
+**Modelo 2. Modelo Holt-Winters**
+
+```{r}
+mape2<-mape(mod2_vicep_serie_ent$x,mod2_vicep_serie_ent$fitted[,1])
+```
+
+Para el modelo de Holt-Winters el porcentaje de error absoluto MAPE es igual a `r mape2`
+
+
+## Gráfico de la serie observada y ajustada
+
+## Predicción para datos de test
+
+## MAPE para datos de test
+
+## Predicción final
+
+
+
+

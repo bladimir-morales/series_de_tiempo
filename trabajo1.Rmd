@@ -1,0 +1,44 @@
+---
+title: "Suavizamiento Exponencial y Medias Móviles"
+author: "Bladimir Morales Torrez"
+date: "Octubre 2021"
+output: 
+  html_document:
+      toc: yes
+      number_section: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(dygraphs)
+library(fpp)
+library(forecast)
+```
+
+```{r}
+mape<-function(y,f){
+  pe<-((y-f)/y)
+  mape1<-(sum(abs(pe))/length(y))*100
+  return(mape1)
+}
+```
+
+```{r child='seccion1.Rmd'}
+```
+
+```{r child='seccion2.Rmd'}
+```
+
+```{r child='seccion3.Rmd'}
+```
+
+```{r}
+#rmarkdown::render("trabajo1.Rmd")
+```
+
+# Introducción
+

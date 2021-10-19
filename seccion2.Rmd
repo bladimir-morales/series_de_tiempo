@@ -1,0 +1,268 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Indice de consumo de agua potable ICAP
+
+## Descripción 
+
+### Datos
+
+El indice mensual de consumo de agua potable de Bolivia ICAP, es un indicador que nos permite conocer la evolución y comportamiento del consumo de agua potable de los sectores privado y público a nivel general con base en el año 1990, esto quiere decir que para esa gestión sera igual a 100 y luego el indice ira variando ya sea en incremento o decremento de acuerdo al consumo de agua potable del mes a tratarse. 
+
+### Periodo de estudio
+
+La serie de tiempo esta con periodicidad mensual, comprendidos desde enero de 1990 hasta julio de 2021, teniendo en total 379 observaciones.
+
+### Fuente de datos
+
+La información del indice mensual de consumo de agua potable de Bolivia se puede encontrar en la página oficial del Instituto Nacional de Estadística (INE)^[www.ine.gob.bo], sección de "Estadísticas Económicas" y subsección "Servicios básicos". Específicamente se puede descargar los datos en formato establecido por la institución en excel del siguiente enlace: (https://nube.ine.gob.bo/index.php/s/M1H9axannIL7leg/download).
+
+Los metadatos están disponibles en el Catálogo del Archivo Nacional de Datos (ANDA) del INE (http://anda4.ine.gob.bo/ANDA4_2/index.php/catalog/254).
+
+Para fines prácticos se puso la variable en estudio en formato *.txt, el cual puede ser descargado del siguiente enlace (https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de agua potable_mes_90_21.txt).
+
+## Gráfico
+
+```{r}
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/agua.txt"
+agua<-read.table("./data/agua.txt",head=T)
+agua_serie<-ts(agua$agua,start = c(1990,1),frequency = 12)
+
+autoplot(agua_serie,series = "ICAP")+
+  ggtitle("Indice mensual de consumo de agua potable en Bolivia: enero 1990 a julio 2021 \n (año base 1990=100)")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values="#2B7DFF")
+```
+
+En el gráfico visualmente se puede observar que la serie de tiempo en estudio tendría tendencia aditiva y efecto estacional. Pero para determinar de mejor forma estos efectos se hará un análisis de gráficos de tendencia y estacionalidad.
+
+### Tendencia
+
+Para obtener la tendencia de la serie de tiempo, se aplicará una media móvil de orden 12 ya que las observaciones son mensuales.
+
+```{r}
+ma_agua_serie<-ma(agua_serie,order = 12)
+
+autoplot(agua_serie,series = "ICAP")+
+  autolayer(ma_agua_serie,series="Tendencia")+
+  ggtitle("Tendencia del Indice mensual de consumo de agua potable en Bolivia")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values=c("#A4C4FC","#E80808"))
+```
+
+Con la media móvil de orden 12 se puede observar en el gráfico la tendencia aditiva de la serie de tiempo, cabe mencionar que en diciembre del 2016 a aproximadamente junio del 2017 hay una rampa decreciente que puede explicarse por un fenómeno climático de sequía y falta de lluvias en Bolivia, lo cual derivó a un desabastecimiento de agua en ocho de los nueve departamentos del país y en 94 barrios del departamento de La Paz existió un racionamiento de agua, esto se detalla de mejor manera el reportaje de CNN en español en su portal web^[https://cnnespanol.cnn.com/2016/11/21/declaran-emergencia-nacional-en-bolivia-por-sequia-y-falta-de-agua/].
+
+### Estacionalidad
+
+```{r}
+ggseasonplot(agua_serie,main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
+           year.labels = T,xlab="Mes",ylab="ICAP")
+```
+
+En este gráfico se puede observar que existe una tendencia creciente, ya que a medida que pasa cada año el consumo de agua potable va aumentando, por otro lado no se presente de manera clara el efecto estacional.
+
+```{r}
+monthplot(agua_serie,ylab="",main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
+          labels = c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"),
+          xlab="Mes")
+```
+
+En este último gráfico se puede observar que podría existir un efecto estacional ya que en los meses de enero y noviembre asciende de manera muy leve el consumo de agua potable en Bolivia, pero en los demás meses se mantiene casi constantemente.
+
+**Conclusión:**  
+Se puede concluir entonces con un análisis visual que la serie en estudio del indice de consumo de agua potable en Bolivia tiene efecto de tendencia aditiva con una posible estacionalidad.
+
+## Datos de entrenamiento y test
+
+Para efecto de obtener un modelo óptimo y lo más preciso posible, se dividirá la serie de tiempo en dos conjuntos:
+
+* Conjunto de datos de entrenamiento: 
+
+Se tomará en cuenta los datos desde enero de 1990 hasta diciembre de 2019, contando con 360 observaciones.
+
+* Conjunto de datos de test.
+
+Se tomará en cuenta los datos desde enero de 2020 hasta julio de 2021, contando con 19 observaciones.
+
+En el siguiente gráfico se puede observar la serie de entrenamiento y de test.
+
+```{r}
+agua_serie_ent<-ts(agua$agua,start = c(1990,1),end = c(2019,12), frequency=12)
+agua_serie_test<-ts(agua$agua[361:379],start = c(2020,1), frequency=12)
+
+autoplot(agua_serie_ent,series = "ICAP \nentrenamiento")+
+  autolayer(agua_serie_test,series="ICAP \ntest")+
+  ggtitle("Conjunto de entrenamiento y test del ICAP")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values=c("#469F4B","#A462EF"))
+```
+
+## Estimación
+
+Se estimaran dos modelos posibles para el conjunto de datos de entrenamiento, tomando en cuenta que nuestra serie de tiempo como se pudo concluir tiene tendencia aditiva y posiblemente estacionalidad.
+
+### Modelo 1
+
+Para este primer modelo, se estimarán los datos con el método de Holt dos parámetros o también llamado suavizamiento exponencial doble, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente no tiene estacionalidad. 
+
+La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
+
+```{r}
+mod1_agua_serie_ent<-HoltWinters(agua_serie_ent,gamma = F)
+mod1_agua_serie_ent
+```
+
+### Modelo 2
+
+Para este segundo modelo, se estimarán los datos con el método de Holt-Winters o también llamado suavizamiento exponencial triple, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente estacionalidad.
+
+La estimación se hará estimando tres parámetros de suavizamiento $\alpha$, $\beta$ y $\gamma$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$, $\beta$ y $\gamma$.
+
+```{r}
+mod2_agua_serie_ent<-HoltWinters(agua_serie_ent)
+mod2_agua_serie_ent
+```
+
+
+## MSE y MAPE
+
+Se calculará el cuadrado medio del error MSE y el Porcentaje de error absoluto medio MAPE, para ambos modelos.
+
+### Cuadrado Medio del Error MSE
+
+**Modelo 1. Modelo Holt dos parámetros**
+
+```{r}
+mse1<-mod1_agua_serie_ent$SSE/length(mod1_agua_serie_ent$x)
+```
+
+Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse1`
+
+**Modelo 2. Modelo Holt-Winters**
+
+```{r}
+mse2<-mod2_agua_serie_ent$SSE/length(mod2_agua_serie_ent$x)
+```
+
+Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse2`
+
+### Porcentaje de error absoluto medio MAPE
+
+**Modelo 1. Modelo Holt dos parámetros**
+
+```{r}
+mape1<-mape(mod1_agua_serie_ent$x,mod1_agua_serie_ent$fitted[,1])
+```
+
+Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape1`
+
+**Modelo 2. Modelo Holt-Winters**
+
+```{r}
+mape2<-mape(mod2_agua_serie_ent$x,mod2_agua_serie_ent$fitted[,1])
+```
+
+Para el modelo de Holt-Winters el porcentaje de error absoluto MAPE es igual a `r mape2`
+
+### Decisión de modelo apropiado
+
+Como se pudo observar el MSE y el MAPE del modelo Holt-Winters es menor al del modelo de Holt dos parámetros, por tal motivo nos quedamos con el modelo de suavizamiento exponencial triple.
+
+## Gráfico de la serie observada y ajustada
+
+Para el siguiente gráfico se utilizará el modelo de Holt-Winters para ajustar la serie de tiempo del conjunto de entrenamiento.
+
+```{r}
+autoplot(agua_serie,series = "ICAP")+
+  autolayer(mod2_agua_serie_ent$fitted[,1],series="Holt-Winters")+
+  ggtitle("ICAP y Método de Holt-Winters")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values=c("#FF0000","#A4C4FC"))
+```
+
+## Predicción para datos de test
+
+Con el modelo de Holt-Winters se predicirá los 19 datos restantes del conjunto de test a partir de los datos de entrenamiento. Con el software R se halla estos datos de predicción con sus respectivos intervalos de confianza.
+
+```{r}
+pred_mod2_agua_serie_ent<-forecast(mod2_agua_serie_ent,19)
+summary(pred_mod2_agua_serie_ent)
+```
+
+En el siguiente gráfico se puede observar de mejor manera los datos de predicción del conjunto de test, así también el conjunto de entrenamiento y test de la serie de tiempo en estudio.
+
+```{r}
+autoplot(agua_serie,series = "ICAP")+
+  autolayer(mod2_agua_serie_ent$fitted[,1],series="Holt-Winters")+
+  autolayer(pred_mod2_agua_serie_ent$mean,series="Predicción")+
+  ggtitle("ICAP y Método de Holt-Winters más predicción")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+```
+
+## MAPE para datos de test
+
+Ahora se hallará el porcentaje de error absoluto medio MAPE de los datos de test con los datos de predicción a partir del modelo de Holt-Winters.
+
+```{r}
+mape_test<-mape(agua_serie_test,pred_mod2_agua_serie_ent$mean)
+```
+
+El MAPE para el conjunto de test es igual a `r mape_test`, se puede ver que es mayor al MAPE del conjunto de entrenamiento (`r mape2`). Esto puede ser respuesta a que en estos últimos meses de la serie de tiempo existió mayor variabilidad en los datos como se pudo ver en el gráfico anterior.
+
+
+## Predicción final
+
+Finalmente se considerará todas las observaciones de la serie de tiempo del indice del consumo de agua potable en Bolivia para poder predecir 5 meses adelante, vale decir del mes de agosto a diciembre del 2021.
+
+```{r}
+modfin_agua_serie<-HoltWinters(agua_serie)
+pred_modfin_agua_serie<-forecast(modfin_agua_serie,5)
+```
+
+También se puede obtener con el softare R un resumen del modelo aplicado en este caso Holt-Winters.
+
+```{r}
+summary(pred_modfin_agua_serie)
+```
+
+Se puede observar que el MAPE bajo el modelo de Holt-Winters de todas las observaciones sube es mayor que el MAPE de los datos de entrenamiento con una diferencia de $0.16816$ puntos porcentuales. 
+
+Por lo tanto se esperaría que para el mes de agosto se tenga un indice de consumo de agua potable en Bolivia de $196.26$, teniendo como punto máximo de consumo en el mes de noviembre.
+
+Para efectos visuales se presenta en el siguiente gráfico la serie original, la serie ajustada con el modelo de Holt-Winters y las predicciones con sus respectivos intervalos.
+
+```{r}
+autoplot(agua_serie,series = "ICAP")+
+  autolayer(modfin_agua_serie$fitted[,1],series="Holt-Winters")+
+  autolayer(pred_modfin_agua_serie,series="Predicción")+
+  ggtitle("ICAP y Método de Holt-Winters más predicción")+
+  xlab("Año")+ylab("ICAP")+
+  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+```
+
+Para visualizar de mejor manera la predicción se tomará en cuenta los datos desde el año 2026.
+
+```{r}
+autoplot(agua_serie,series = "ICAP")+
+  autolayer(modfin_agua_serie$fitted[,1],series="Holt-Winters")+
+  autolayer(pred_modfin_agua_serie,series="Predicción")+
+  ggtitle("ICAP y Método de Holt-Winters más predicción")+
+  xlab("Año")+ylab("ICAP")+
+  xlim(2016,2022)+ylim(170,222)+
+  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+```
+
+## Conclusiones
+
+En esta sección se estudio la serie temporal del indice de consumo de agua potable en Bolivia desde el periodo de enero de 1990 hasta julio del 2021, teniendo en total 379 observaciones a nivel mensual, se pudo determinar la existencia de tendencia aditiva con estacionalidad bajo un análisis de gráficos.
+
+Al ajustar la serie se propuso un modelo de Holt dos parámetros y otro un modelo de Holt-Winters (suavizamiento exponencial triple), al hallar el cuadrado medio del error MSE y el porcentaje de error absoluto medio MAPE se pudo determinar y decidir que el modelo óptimo para este estudio era el Holt-Winters asumiendo así que la serie aparte de contar con tendencia adtivia también cuenta con efecto estacional.
+
+Una vez ajustado los datos con el modelo óptimo se hizo las predicciones a 5 meses posteriores a los conocidos teniendo un indice aproxiamdo de consumo de agua para el mes de agosto de $196.26$ y observando que probablemente el mes de noviembre sea el que mayor indice presente en estos últimos cinco meses del presente año.
+
+
+
