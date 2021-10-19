@@ -33,7 +33,8 @@ exportacion<-read.table(url,head=T)
 exportacion_serie<-ts(exportacion$exportacion ,start = c(1980),frequency = 1)
 
 autoplot(exportacion_serie,series = "Gasto de exportación")+
-  ggtitle("Gasto de exportaciones de bienes y servicios del PIB \n(precios constantes)  Bolivia: 1980 a 2020 ")+
+  ggtitle("Gasto de exportaciones de bienes y servicios del PIB \n(precios constantes)  
+          Bolivia: 1980 a 2020 ")+
   xlab("Año")+ylab("miles de bolivianos")+
   scale_color_manual(values="#2B7DFF")
 ```
@@ -83,7 +84,8 @@ exportacion_serie_test<-ts(exportacion$exportacion[39:41],start = c(2018), frequ
 
 autoplot(exportacion_serie_ent,series = "Gasto exportación \nentrenamiento")+
   autolayer(exportacion_serie_test,series="Gasto exportación \ntest")+
-  ggtitle("Conjunto de entrenamiento y test del Gasto de exportaciones de bienes y servicios del PIB")+
+  ggtitle("Conjunto de entrenamiento y test del Gasto de exportaciones de bienes y 
+          servicios del PIB")+
   xlab("Año")+ylab("miles de bolivianos")+
   scale_color_manual(values=c("#469F4B","#A462EF"))
 ```

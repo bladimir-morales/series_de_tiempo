@@ -1,6 +1,6 @@
 ---
 title: "Suavizamiento Exponencial y Medias Móviles"
-subtitle: "Trabajo 1. Series de Tiempo"
+subtitle: "Trabajo 1. Análisis de Series de Tiempo"
 author: "Bladimir Valerio Morales Torrez"
 date: "Octubre 2021"
 output: 
@@ -32,7 +32,7 @@ mape<-function(y,f){
 
 # Introducción
 
-Para este primer trabajo de series de tiempo se aplicarán técnicas de modelamiento en series temporales, como las medias móviles con diferente orden y los métodos de suavizamiento exponencial simple, doble y triple o también conocidos como modelos de Holt, Holt dos parámetros y Holt-Winters respectivamente.
+Para este primer trabajo de análisis de series de tiempo se aplicarán técnicas de modelamiento en series temporales, como las medias móviles con diferente orden y los métodos de suavizamiento exponencial simple, doble y triple o también conocidos como modelos de Holt, Holt dos parámetros y Holt-Winters respectivamente.
 
 Las series de tiempo a aplicarse son:
 

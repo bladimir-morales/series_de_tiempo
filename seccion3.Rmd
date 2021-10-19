@@ -32,7 +32,8 @@ agua<-read.table("./data/agua.txt",head=T)
 agua_serie<-ts(agua$agua,start = c(1990,1),frequency = 12)
 
 autoplot(agua_serie,series = "ICAP")+
-  ggtitle("Indice mensual de consumo de agua potable en Bolivia: enero 1990 a julio 2021 \n (año base 1990=100)")+
+  ggtitle("Indice mensual de consumo de agua potable en Bolivia: enero 1990 a julio 2021 \n 
+          (año base 1990=100)")+
   xlab("Año")+ylab("ICAP")+
   scale_color_manual(values="#2B7DFF")
 ```
