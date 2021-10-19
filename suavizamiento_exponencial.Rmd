@@ -88,7 +88,7 @@ serie_pib_test
 **Modelo**
 
 ```{r}
-mod1_serie_pib<-HoltWinters(serie_pib_ent,beta=FALSE,gamma = FALSE)
+mod1_serie_pib<-HoltWinters(serie_pib_ent,gamma = FALSE)
 mod1_serie_pib
 ```
 
@@ -99,7 +99,7 @@ plot(mod1_serie_pib)
 **Medida de calidad de ajuste**
 
 ```{r}
-PE<-abs((mod1_serie_pib$x-mod1_serie_pib$fitted)/mod1_serie_pib$x)
+PE<-abs((mod1_serie_pib$x-mod1_serie_pib$fitted[,1])/mod1_serie_pib$x)
 MAPE<-sum(PE)/length(PE)
 MAPE*100
 ```
@@ -133,7 +133,7 @@ qqplot(mod1_serie_pib_pred$x,mod1_serie_pib_pred$residuals,main="QQ-plot")
 **Modelo**
 
 ```{r}
-mod2_serie_pib<-HoltWinters(serie_pib_ent,gamma = FALSE)
+mod2_serie_pib<-HoltWinters(serie_pib_ent)
 mod2_serie_pib
 ```
 
@@ -144,9 +144,9 @@ plot(mod2_serie_pib)
 **Medida de calidad de ajuste**
 
 ```{r}
-PE<-abs((mod2_serie_pib$x-mod2_serie_pib$fitted)/mod2_serie_pib$x)
-MAPE<-sum(PE)/length(PE)
-MAPE*100
+PE<-abs((mod2_serie_pib$x-mod2_serie_pib$fitted[,1])/mod2_serie_pib$x)
+MAPE2<-sum(PE)/length(PE)
+MAPE2*100
 ```
 
 **Predicción**
@@ -198,12 +198,11 @@ url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/d
 agua<-read.table(url,head=T)
 
 serie_agua<-ts(agua,start = c(1990,1),frequency = 12)
-```
-
-
-```{r}
 plot(serie_agua,main="Indice mensual de consumo de agua potable base 1990=100\n Bolivia (Enero 1990 a Julio 2021)",
      xlab="Gestión",ylab="Indice de consumo de agua potable")
+
+seasonplot(serie_agua)
+monthplot(serie_agua)
 ```
 
 Esta serie de tiempo al hacer un análisis visual probablemente tendrá el siguiente comportamiento:

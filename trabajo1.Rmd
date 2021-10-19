@@ -1,17 +1,19 @@
 ---
 title: "Suavizamiento Exponencial y Medias Móviles"
-author: "Bladimir Morales Torrez"
+subtitle: "Trabajo 1. Series de Tiempo"
+author: "Bladimir Valerio Morales Torrez"
 date: "Octubre 2021"
 output: 
   html_document:
       toc: yes
+      toc_float: yes
       number_section: yes
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,warning = F,message = F)
 library(readxl)
 library(tidyverse)
 library(dygraphs)
@@ -19,13 +21,37 @@ library(fpp)
 library(forecast)
 ```
 
-```{r}
+```{r include=FALSE}
 mape<-function(y,f){
   pe<-((y-f)/y)
   mape1<-(sum(abs(pe))/length(y))*100
   return(mape1)
 }
 ```
+\newpage
+
+# Introducción
+
+Para este primer trabajo de series de tiempo se aplicarán técnicas de modelamiento en series temporales, como las medias móviles con diferente orden y los métodos de suavizamiento exponencial simple, doble y triple o también conocidos como modelos de Holt, Holt dos parámetros y Holt-Winters respectivamente.
+
+Las series de tiempo a aplicarse son:
+
+* Indicador de inflación de Bolivia (enero 2014 a septiembre 2021).
+
+* Gasto en la exportación de bienes y servicios del producto interno bruto a precios constantes (1980 a 2020).
+
+* Indice de consumo de agua potable ICAP (enero 1990 a julio 2021).
+
+Se puede encontrar el repositorio de datos y del informe en el siguiente enlace (https://github.com/bladimir-morales/series_de_tiempo).
+
+Se puede visualizar el presente informe en formato pdf, en el siguiente enlace:
+
+- https://bladimir-morales.github.io/series_de_tiempo/trabajo1.pdf
+
+Se puede visualizar el presente informe en formato html, en el siguiente enlace:
+
+- https://bladimir-morales.github.io/series_de_tiempo/trabajo1.html
+
 
 ```{r child='seccion1.Rmd'}
 ```
@@ -36,9 +62,8 @@ mape<-function(y,f){
 ```{r child='seccion3.Rmd'}
 ```
 
-```{r}
+```{r include=FALSE}
 #rmarkdown::render("trabajo1.Rmd")
 ```
 
-# Introducción
 

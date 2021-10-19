@@ -1,8 +1,3 @@
----
-output: html_document
-editor_options: 
-  chunk_output_type: console
----
 
 # Indice de consumo de agua potable ICAP
 
@@ -27,10 +22,10 @@ Para fines prácticos se puso la variable en estudio en formato *.txt, el cual p
 ## Gráfico
 
 ```{r}
-url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de agua potable_mes_90_21.txt"
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/agua.txt"
 
-inflacion<-read.table("./data/inflacion.txt",head=T)
-agua_serie<-ts(agua,start = c(1990,1),frequency = 12)
+agua<-read.table("./data/agua.txt",head=T)
+agua_serie<-ts(agua$agua,start = c(1990,1),frequency = 12)
 
 autoplot(agua_serie,series = "ICAP")+
   ggtitle("Indice mensual de consumo de agua potable en Bolivia: enero 1990 a julio 2021 \n (año base 1990=100)")+
@@ -59,14 +54,14 @@ Con el gráfico se puede observar la tendencia aditiva de la serie de tiempo en 
 
 
 ```{r}
-ggseasonplot(agua_serie,main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
+ggseasonplot(inflacion_serie,main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
            year.labels = T,xlab="Mes",ylab="Indice de consumo de agua potable")
 ```
 
 En este gráfico se puede observar que existe una tendencia creciente, ya que a medida que pasa un año el consumo de agua potable va aumentando, por otro lado no se puede observar aparentemente estacionalidad en los meses de estudio.
 
 ```{r}
-monthplot(agua_serie,ylab="",main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
+monthplot(inflacion_serie,ylab="",main="Estacionalidad del Indice Mensual de Consumo de Agua Potable",
           labels = c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"),
           xlab="Mes")
 ```
@@ -90,11 +85,13 @@ Se tomará en cuenta los datos desde enero de 1990 hasta diciembre de 2019, cont
 Se tomará en cuenta los datos desde enero de 2020 hasta julio de 2021, contando con 19 observaciones.
 
 ```{r}
-agua_serie_ent<-ts(agua,start = c(1990,1),end = c(2019,12), frequency=12)
-autoplot(agua_serie_ent,series = "ICAP \nentrenamiento")+
-  autolayer(agua_serie_test,series="ICAP \ntest")+
-  ggtitle("Conjunto de entrenamiento y test del ICAP")+
-  xlab("Año")+ylab("ICAP")+
+inflacion_serie_ent<-ts(inflacion$inflacion,start = c(2014,1),end = c(2019,12), frequency=12)
+inflacion_serie_test<-ts(inflacion$inflacion[73:93],start = c(2020,1), frequency=12)
+
+autoplot(inflacion_serie_ent,series = "Inflación \nentrenamiento")+
+  autolayer(inflacion_serie_test,series="Inflación \ntest")+
+  ggtitle("Conjunto de entrenamiento y test de la Inflación")+
+  xlab("Año")+ylab("Inflación")+
   scale_color_manual(values=c("#469F4B","#A462EF"))
 ```
 
@@ -109,8 +106,8 @@ Para este primer modelo, se estimarán los datos con el método de Holt dos par�
 La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
 
 ```{r}
-mod1_agua_serie_ent<-HoltWinters(agua_serie_ent,gamma = F)
-mod1_agua_serie_ent
+mod1_inflacion_serie_ent<-HoltWinters(inflacion_serie_ent,beta=F,gamma = F)
+mod1_inflacion_serie_ent
 ```
 
 ### Modelo 2
@@ -120,8 +117,8 @@ Para este segundo modelo, se estimarán los datos con el método de Holt-Winters
 La estimación se hará estimando tres parámetros de suavizamiento $\alpha$, $\beta$ y $\gamma$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$, $\beta$ y $\gamma$.
 
 ```{r}
-mod2_agua_serie_ent<-HoltWinters(agua_serie_ent)
-mod2_agua_serie_ent
+mod2_inflacion_serie_ent<-HoltWinters(inflacion_serie_ent)
+mod2_inflacion_serie_ent
 ```
 
 
@@ -134,7 +131,7 @@ Se calculará el cuadrado medio del error MSE y el Porcentaje de error absoluto 
 **Modelo 1. Modelo Holt dos parámetros**
 
 ```{r}
-mse1<-mod1_agua_serie_ent$SSE/length(mod1_agua_serie_ent$x)
+mse1<-mod1_inflacion_serie_ent$SSE/length(mod1_inflacion_serie_ent$x)
 ```
 
 Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse1`
@@ -142,7 +139,7 @@ Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual 
 **Modelo 2. Modelo Holt-Winters**
 
 ```{r}
-mse2<-mod2_agua_serie_ent$SSE/length(mod1_agua_serie_ent$x)
+mse2<-mod2_inflacion_serie_ent$SSE/length(mod1_inflacion_serie_ent$x)
 ```
 
 Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse2`
@@ -152,7 +149,7 @@ Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse
 **Modelo 1. Modelo Holt dos parámetros**
 
 ```{r}
-mape1<-mape(mod1_agua_serie_ent$x,mod1_agua_serie_ent$fitted[,1])
+mape1<-mape(mod1_inflacion_serie_ent$x,mod1_inflacion_serie_ent$fitted[,1])
 ```
 
 Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape1`
@@ -160,7 +157,7 @@ Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es i
 **Modelo 2. Modelo Holt-Winters**
 
 ```{r}
-mape2<-mape(mod2_agua_serie_ent$x,mod2_agua_serie_ent$fitted[,1])
+mape2<-mape(mod2_inflacion_serie_ent$x,mod2_inflacion_serie_ent$fitted[,1])
 ```
 
 Para el modelo de Holt-Winters el porcentaje de error absoluto MAPE es igual a `r mape2`

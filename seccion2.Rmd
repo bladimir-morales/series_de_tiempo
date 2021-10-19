@@ -4,87 +4,64 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Indice de consumo de pei potable ICAP
+# Gasto en la exportación de bienes y servicios del producto interno bruto a precios constantes
 
 ## Descripción 
 
 ### Datos
 
-El indice mensual de consumo de pei potable de Bolivia ICAP, es un indicador que nos permite conocer la evolución y comportamiento del consumo de pei potable de los sectores privado y público a nivel general con base en el año 1990, esto quiere decir que para esa gestión sera igual a 100 y luego el indice ira variando ya sea en incremento o decremento de acuerdo al consumo de pei potable del mes a tratarse. 
+El Producto Interno Bruto (PIB), es es un indicador que nació en una de las peores etapas que sufrió la economía mundial en 1934. En esta época debido al denominado *CRACK*^[Caída del mercado de valores en la historia de la Bolsa en Estados Unidos, teniendo un alcance global y una larga duración de sus secuelas.] de 1929, donde existía una recesión mundial que afectaba a todos los países desarrollados, el economista Simon Kuznets presentó un informe al Congreso de los Estados Unidos cuyo título fue ``Ingreso Nacional 1929-1932'', en ese informe se desarrollo por primera vez el concepto del PIB, que se presentó como indicador para medir los ingresos de la economía de un país^[ https://www.deudaexterna.es/quien-invento-el-producto-interior-bruto-pib/].
+
+En esta sección específicamente se estudiará la serie histórica del producto interno bruto PIB a precios constantes pero del gasto en las exportaciones de bienes y servicios de Bolivia.
+
 
 ### Periodo de estudio
 
-La serie de tiempo esta con periodicidad mensual, comprendidos desde enero de 1990 hasta julio de 2021, teniendo en total 379 observaciones.
+La serie de tiempo esta con periodicidad anual, comprendidos desde 1980 hasta 2020, teniendo en total 41 observaciones.
 
 ### Fuente de datos
 
-La información del indice mensual de consumo de pei potable de Bolivia se puede encontrar en la página oficial del Instituto Nacional de Estadística (INE)^[www.ine.gob.bo], sección de "Estadísticas Económicas" y subsección "Servicios básicos". Específicamente se puede descargar los datos en formato establecido por la institución en excel del siguiente enlace: (https://nube.ine.gob.bo/index.php/s/M1H9axannIL7leg/download).
+La información de la serie histórica del PIB de Bolivia se puede encontrar en la página oficial del Instituto Nacional de Estadística (INE)^[www.ine.gob.bo], sección de "Estadísticas Económicas" y subsección "Cuentas nacionales/ Producto Interno Bruto Anual/ Serie histórica del Producto Interno Bruto". Específicamente se puede descargar los datos por tipo de gasto en formato establecido por la institución en excel del siguiente enlace: (https://nube.ine.gob.bo/index.php/s/mtxhzlHWVbkCfOk/download), donde se podrá encontrar el gasto de exportaciones de bienes y servicios.
 
-Los metadatos están disponibles en el Catálogo del Archivo Nacional de Datos (ANDA) del INE (http://anda4.ine.gob.bo/ANDA4_2/index.php/catalog/254).
-
-Para fines prácticos se puso la variable en estudio en formato *.txt, el cual puede ser descargado del siguiente enlace (https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de pei potable_mes_90_21.txt).
+Para fines prácticos se puso la variable en estudio en formato *.txt, el cual puede ser descargado del siguiente enlace (https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/exportacion.txt).
 
 ## Gráfico
 
 ```{r}
-url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/pei.txt"
-pei<-read.table("./data/pei.txt",head=T)
-pei_serie<-ts(pei$PEI ,start = c(2016,1),frequency = 12)
+url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/exportacion.txt"
+exportacion<-read.table(url,head=T)
+exportacion_serie<-ts(exportacion$exportacion ,start = c(1980),frequency = 1)
 
-autoplot(pei_serie,series = "EBS")+
-  ggtitle("Gasto de peies de bienes y servicios de pei\n(precio constante) de Bolivia 1980 a 2020 ")+
-  xlab("Año")+ylab("EBS")+
+autoplot(exportacion_serie,series = "Gasto de exportación")+
+  ggtitle("Gasto de exportaciones de bienes y servicios del PIB \n(precios constantes)  Bolivia: 1980 a 2020 ")+
+  xlab("Año")+ylab("miles de bolivianos")+
   scale_color_manual(values="#2B7DFF")
-
-mod1<-HoltWinters(pei_serie,gamma = F)
-mod2<-HoltWinters(pei_serie)
-
-plot(mod1)
-plot(mod2)
-
-mape(mod1$x,mod1$fitted[,1])
-mape(mod2$x,mod2$fitted[,1])
-
-
 ```
 
-En el gráfico visualmente se puede observar que la serie de tiempo en estudio tendría tendencia aditiva y efecto estacional. Pero para determinar de mejor forma estos efectos se hará un análisis de gráficos de tendencia y estacionalidad.
+En el gráfico visualmente se puede observar que la serie de tiempo en estudio tendría tendencia aditiva creciente hasta 2014 y luego desde el 2015 una tendencia decreciente, como es una serie anual no presenta estacionalidad. Pero para determinar de mejor forma estos efectos se hará un análisis de gráficos de tendencia.
 
 ### Tendencia
 
-Para obtener la tendencia de la serie de tiempo, se aplicará una media móvil de orden 12 ya que las observaciones son mensuales.
+Para obtener la tendencia de la serie de tiempo, se aplicará una media móvil de orden 3.
 
 ```{r}
-ma_pei_serie<-ma(pei_serie,order = 3)
+ma_exportacion_serie<-ma(exportacion_serie,order = 3)
 
-autoplot(pei_serie,series = "EBS")+
-  autolayer(ma_pei_serie,series="Tendencia")+
-  ggtitle("Tendencia del Indice mensual de consumo de pei potable en Bolivia")+
-  xlab("Año")+ylab("EBS")+
+autoplot(exportacion_serie,series = "Gasto de exportación")+
+  autolayer(ma_exportacion_serie,series="Tendencia")+
+  ggtitle("Tendencia del Gasto de exportaciones de bienes y servicios del PIB")+
+  xlab("Año")+ylab("miles de bolivianos")+
   scale_color_manual(values=c("#A4C4FC","#E80808"))
 ```
 
-Con la media móvil de orden 12 se puede observar en el gráfico la tendencia aditiva de la serie de tiempo, cabe mencionar que en diciembre del 2016 a aproximadamente junio del 2017 hay una rampa decreciente que puede explicarse por un fenómeno climático de sequía y falta de lluvias en Bolivia, lo cual derivó a un desabastecimiento de pei en ocho de los nueve departamentos del país y en 94 barrios del departamento de La Paz existió un racionamiento de pei, esto se detalla de mejor manera el reportaje de CNN en español en su portal web^[https://cnnespanol.cnn.com/2016/11/21/declaran-emergencia-nacional-en-bolivia-por-sequia-y-falta-de-pei/].
+Con la media móvil de orden 3 se puede observar en el gráfico la tendencia aditiva de la serie de tiempo creciente hasta el 2014 y a partir del 2015 va descendiendo, según el economista Jose Gabriel Espinosa explica que las exportaciones bolivianas se concentraron tanto en ciertos productos y mercados, que aumentaron la vulnerabilidad de la economía a contextos com el que se vio con la caída de los precios de las materias primas.
 
-### Estacionalidad
+Las exportaciones de hidrocarburos llegaron a mantener un crecimiento constante hasta 2013 reportando un valor de 6.624 millones de dólares, pero, después, declinaron hasta registrar un valor exportado de 3.972 millones de dólares en 2015 y se constituyó en el rubro más afectado por la caída de los precios internacionales.   
 
-```{r}
-ggseasonplot(pei_serie,main="Estacionalidad del Indice Mensual de Consumo de pei Potable",
-           year.labels = T,xlab="Mes",ylab="ICAP")
-```
-
-En este gráfico se puede observar que existe una tendencia creciente, ya que a medida que pasa cada año el consumo de pei potable va aumentando, por otro lado no se presente de manera clara el efecto estacional.
-
-```{r}
-monthplot(pei_serie,ylab="",main="Estacionalidad del Indice Mensual de Consumo de pei Potable",
-          labels = c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"),
-          xlab="Mes")
-```
-
-En este último gráfico se puede observar que podría existir un efecto estacional ya que en los meses de enero y noviembre asciende de manera muy leve el consumo de pei potable en Bolivia, pero en los demás meses se mantiene casi constantemente.
+Los minerales tampoco se quedaron atrás en el dudoso ranking de caídas. El valor de las exportaciones cayó en 2013 y 2014 por la caída del precio internacional de  este rubro. Toda esta información se puede ver a mayor detalle en el reportaje del sitio web del periodico "Los Tiempos"^[https://www.lostiempos.com/actualidad/economia/20160803/decada-repunte-exportaciones-se-desploman].
 
 **Conclusión:**  
-Se puede concluir entonces con un análisis visual que la serie en estudio del indice de consumo de pei potable en Bolivia tiene efecto de tendencia aditiva con una posible estacionalidad.
+Se puede concluir entonces con un análisis visual que la serie en estudio del gasto de exportaciones de bienes y servicios del PIB de Bolivia cuenta con tendencia aditiva creciente hasta el 2014 y a partir del 2015 decreciente.
 
 ## Datos de entrenamiento y test
 
@@ -92,49 +69,49 @@ Para efecto de obtener un modelo óptimo y lo más preciso posible, se dividirá
 
 * Conjunto de datos de entrenamiento: 
 
-Se tomará en cuenta los datos desde enero de 1990 hasta diciembre de 2019, contando con 360 observaciones.
+Se tomará en cuenta los datos desde 1980 hasta 2017, contando con 38 observaciones.
 
 * Conjunto de datos de test.
 
-Se tomará en cuenta los datos desde enero de 2020 hasta julio de 2021, contando con 19 observaciones.
+Se tomará en cuenta los datos desde el 2018 hasta 2020, contando con 3 observaciones.
 
 En el siguiente gráfico se puede observar la serie de entrenamiento y de test.
 
 ```{r}
-pei_serie_ent<-ts(pei$pei,start = c(1971),end = c(2010), frequency=1)
-pei_serie_test<-ts(pei$pei[41:46],start = c(2011), frequency=1)
+exportacion_serie_ent<-ts(exportacion$exportacion,start = c(1980),end = c(2017), frequency=1)
+exportacion_serie_test<-ts(exportacion$exportacion[39:41],start = c(2018), frequency=1)
 
-autoplot(pei_serie_ent,series = "ICAP \nentrenamiento")+
-  autolayer(pei_serie_test,series="ICAP \ntest")+
-  ggtitle("Conjunto de entrenamiento y test del ICAP")+
-  xlab("Año")+ylab("ICAP")+
+autoplot(exportacion_serie_ent,series = "Gasto exportación \nentrenamiento")+
+  autolayer(exportacion_serie_test,series="Gasto exportación \ntest")+
+  ggtitle("Conjunto de entrenamiento y test del Gasto de exportaciones de bienes y servicios del PIB")+
+  xlab("Año")+ylab("miles de bolivianos")+
   scale_color_manual(values=c("#469F4B","#A462EF"))
 ```
 
 ## Estimación
 
-Se estimaran dos modelos posibles para el conjunto de datos de entrenamiento, tomando en cuenta que nuestra serie de tiempo como se pudo concluir tiene tendencia aditiva y posiblemente estacionalidad.
+Para efectos prácticos se estimará dos modelos para el conjunto de datos de entrenamiento en este caso un modelo de Holt y un Holt dos parámetros, tomando en cuenta que nuestra serie de tiempo como se pudo observar solo cuenta con tendencia, por tal motivo no seria correcto utilizar un modelo de Holt o Holt-Winters ya que cada uno corresponde cuando la serie de tiempo no tiene tendencia ni estacionalidad y el otro cuando tiene tendencia y estacionalidad, pero como se mencionó para efectos prácticos se utilizarán dos modelos.
 
 ### Modelo 1
 
-Para este primer modelo, se estimarán los datos con el método de Holt dos parámetros o también llamado suavizamiento exponencial doble, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente no tiene estacionalidad. 
+Para este modelo, se estimarán los datos con el método de Holt o también llamado suavizamiento exponencial simple, esto solo para efectos prácticos 
 
-La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
+La estimación se hará estimando un parámetro de suavizamiento $\alpha$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$.
 
 ```{r}
-mod1_pei_serie_ent<-HoltWinters(pei_serie_ent,beta=F,gamma = F)
-mod1_pei_serie_ent
+mod1_exportacion_serie_ent<-HoltWinters(exportacion_serie_ent,beta=F,gamma = F)
+mod1_exportacion_serie_ent
 ```
 
 ### Modelo 2
 
-Para este segundo modelo, se estimarán los datos con el método de Holt-Winters o también llamado suavizamiento exponencial triple, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente estacionalidad.
+Para este segundo modelo, se estimarán los datos con el método de Holt dos parámetros o también llamado suavizamiento exponencial doble, esto debido a que la serie de tiempo cuenta con tendencia.
 
-La estimación se hará estimando tres parámetros de suavizamiento $\alpha$, $\beta$ y $\gamma$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$, $\beta$ y $\gamma$.
+La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
 
 ```{r}
-mod2_pei_serie_ent<-HoltWinters(pei_serie_ent,gamma = F)
-mod2_pei_serie_ent
+mod2_exportacion_serie_ent<-HoltWinters(exportacion_serie_ent,gamma = F)
+mod2_exportacion_serie_ent
 ```
 
 
@@ -144,136 +121,140 @@ Se calculará el cuadrado medio del error MSE y el Porcentaje de error absoluto 
 
 ### Cuadrado Medio del Error MSE
 
-**Modelo 1. Modelo Holt dos parámetros**
+**Modelo 1. Modelo Holt (suavizamiento exponencial simple)**
 
 ```{r}
-mse1<-mod1_pei_serie_ent$SSE/length(mod1_pei_serie_ent$x)
+mse1<-mod1_exportacion_serie_ent$SSE/length(mod1_exportacion_serie_ent$x)
+mse1
 ```
 
-Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse1`
+Para el modelo de Holt  el cuadrado medio del error MSE es igual a `r mse1`
 
-**Modelo 2. Modelo Holt-Winters**
+**Modelo 2. Modelo Holt dos parámetros (suavizamiento exponencial doble)**
 
 ```{r}
-mse2<-mod2_pei_serie_ent$SSE/length(mod2_pei_serie_ent$x)
+mse2<-mod2_exportacion_serie_ent$SSE/length(mod2_exportacion_serie_ent$x)
+mse2
 ```
 
-Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse2`
+Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse2`
 
 ### Porcentaje de error absoluto medio MAPE
 
-**Modelo 1. Modelo Holt dos parámetros**
+**Modelo 1. Modelo Holt (suavizamiento exponencial simple)**
 
 ```{r}
-mape1<-mape(mod1_pei_serie_ent$x,mod1_pei_serie_ent$fitted[,1])
+mape1<-mape(mod1_exportacion_serie_ent$x,mod1_exportacion_serie_ent$fitted[,1])
+mape1
 ```
 
-Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape1`
+Para el modelo de Holt el porcentaje de error absoluto MAPE es igual a `r mape1`
 
-**Modelo 2. Modelo Holt-Winters**
+**Modelo 2. Modelo Holt dos parámetros (suavizamiento exponencial doble)**
 
 ```{r}
-mape2<-mape(mod2_pei_serie_ent$x,mod2_pei_serie_ent$fitted[,1])
+mape2<-mape(mod2_exportacion_serie_ent$x,mod2_exportacion_serie_ent$fitted[,1])
+mape2
 ```
 
-Para el modelo de Holt-Winters el porcentaje de error absoluto MAPE es igual a `r mape2`
+Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape2`
 
 ### Decisión de modelo apropiado
 
-Como se pudo observar el MSE y el MAPE del modelo Holt-Winters es menor al del modelo de Holt dos parámetros, por tal motivo nos quedamos con el modelo de suavizamiento exponencial triple.
+Como se pudo observar el MSE y el MAPE del modelo Holt dos parámetros es menor al del modelo de Holt, por tal motivo nos quedamos con el modelo de suavizamiento exponencial doble.
 
 ## Gráfico de la serie observada y ajustada
 
-Para el siguiente gráfico se utilizará el modelo de Holt-Winters para ajustar la serie de tiempo del conjunto de entrenamiento.
+Para el siguiente gráfico se utilizará el modelo de Holt para ajustar la serie de tiempo del conjunto de entrenamiento.
 
 ```{r}
-autoplot(pei_serie,series = "ICAP")+
-  autolayer(mod2_pei_serie_ent$fitted[,1],series="Holt-Winters")+
-  ggtitle("ICAP y Método de Holt-Winters")+
-  xlab("Año")+ylab("ICAP")+
-  scale_color_manual(values=c("#FF0000","#A4C4FC"))
+autoplot(exportacion_serie,series = "Gasto de exporación")+
+  autolayer(mod2_exportacion_serie_ent$fitted[,1],series="Holt dos parámetros")+
+  ggtitle("Gasto de exporación del PIB y Estimaicón con el Método de Holt dos parámetros")+
+  xlab("Año")+ylab("miles de bolivianos")+
+  scale_color_manual(values=c("#A4C4FC","#FF0000"))
 ```
 
 ## Predicción para datos de test
 
-Con el modelo de Holt-Winters se predicirá los 19 datos restantes del conjunto de test a partir de los datos de entrenamiento. Con el software R se halla estos datos de predicción con sus respectivos intervalos de confianza.
+Con el modelo de Holt se predicirá los 3 datos restantes del conjunto de test a partir de los datos de entrenamiento. Con el software R se halla estos datos de predicción con sus respectivos intervalos.
 
 ```{r}
-pred_mod2_pei_serie_ent<-forecast(mod2_pei_serie_ent,5)
-summary(pred_mod2_pei_serie_ent)
+pred_mod2_exportacion_serie_ent<-forecast(mod2_exportacion_serie_ent,3)
+summary(pred_mod2_exportacion_serie_ent)
 ```
 
-En el siguiente gráfico se puede observar de mejor manera los datos de predicción del conjunto de test, así también el conjunto de entrenamiento y test de la serie de tiempo en estudio.
+En el siguiente gráfico se puede observar de mejor manera los datos de predicción del conjunto de test, el conjunto de entrenamiento y  el conjunto de test de la serie de tiempo en estudio.
 
 ```{r}
-autoplot(pei_serie,series = "ICAP")+
-  autolayer(mod2_pei_serie_ent$fitted[,1],series="Holt-Winters")+
-  autolayer(pred_mod2_pei_serie_ent$mean,series="Predicción")+
-  ggtitle("ICAP y Método de Holt-Winters más predicción")+
-  xlab("Año")+ylab("ICAP")+
-  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+autoplot(exportacion_serie,series = "Gasto de exportación")+
+  autolayer(mod2_exportacion_serie_ent$fitted[,1],series="Holt dos parámetros")+
+  autolayer(pred_mod2_exportacion_serie_ent$mean,series="Predicción")+
+  ggtitle("Gasto de exporación del PIB y Estimaicón con el Método de Holt dos parámetros")+
+  xlab("Año")+ylab("miles de bolivianos")+
+  scale_color_manual(values=c("#A4C4FC","#E80808","#189B0D"))
 ```
 
 ## MAPE para datos de test
 
-Ahora se hallará el porcentaje de error absoluto medio MAPE de los datos de test con los datos de predicción a partir del modelo de Holt-Winters.
+Ahora se hallará el porcentaje de error absoluto medio MAPE de los datos de test con los datos de predicción a partir del modelo de Holt dos parámetros
 
 ```{r}
-mape_test<-mape(pei_serie_test,pred_mod2_pei_serie_ent$mean)
+mape_test<-mape(exportacion_serie_test,pred_mod2_exportacion_serie_ent$mean)
+mape_test
 ```
 
-El MAPE para el conjunto de test es igual a `r mape_test`, se puede ver que es mayor al MAPE del conjunto de entrenamiento (`r mape2`). Esto puede ser respuesta a que en estos últimos meses de la serie de tiempo existió mayor variabilidad en los datos como se pudo ver en el gráfico anterior.
-
+El MAPE para el conjunto de test es igual a `r mape_test`, se puede ver que es mayor al MAPE del conjunto de entrenamiento (`r mape2`). Esto puede ser respuesta a que el último año vale decir el 2020 tuvo una caida bastante fuerte las exportaciones que posiblemente sea por la pandemia de la Covid-19 que actualmente atraviesa nuestro planeta.
 
 ## Predicción final
 
-Finalmente se considerará todas las observaciones de la serie de tiempo del indice del consumo de pei potable en Bolivia para poder predecir 5 meses adelante, vale decir del mes de agosto a diciembre del 2021.
+Finalmente se considerará todas las observaciones de la serie de tiempo del gasto en la exportación de bienes y servicios del producto interno bruto a precios constantes se Bolivia para poder predecir 5 años adelante, vale decir para el año 2021 al 2025. Hacer notar que al tratarse de una serie anual estimar bastantes años no serán muy confiables los últimos años estimados.
 
 ```{r}
-modfin_pei_serie<-HoltWinters(pei_serie,gamma = F)
-pred_modfin_pei_serie<-forecast(modfin_pei_serie,5)
+modfin_exportacion_serie<-HoltWinters(exportacion_serie,gamma = F)
+pred_modfin_exportacion_serie<-forecast(modfin_exportacion_serie,5)
 ```
 
-También se puede obtener con el softare R un resumen del modelo aplicado en este caso Holt-Winters.
+También se puede obtener con el softare R un resumen del modelo aplicado en este caso Holt dos parámetros.
 
 ```{r}
-summary(pred_modfin_pei_serie)
+summary(pred_modfin_exportacion_serie)
 ```
 
-Se puede observar que el MAPE bajo el modelo de Holt-Winters de todas las observaciones sube es mayor que el MAPE de los datos de entrenamiento con una diferencia de $0.16816$ puntos porcentuales. 
+Se puede observar que el MAPE bajo el modelo de Holt dos parámetros de todas las observaciones es mayor que el MAPE de los datos de entrenamiento con una diferencia de $0.4739897$ puntos porcentuales. 
 
-Por lo tanto se esperaría que para el mes de agosto se tenga un indice de consumo de pei potable en Bolivia de $196.26$, teniendo como punto máximo de consumo en el mes de noviembre.
+Por lo tanto se esperaría que para el año 2021 se tenga un gasto en la exportación de bienes y servicios del producto interno bruto a precios constantes en Bolivia de $9,485,586.00$ miles de bolivianos.
 
-Para efectos visuales se presenta en el siguiente gráfico la serie original, la serie ajustada con el modelo de Holt-Winters y las predicciones con sus respectivos intervalos.
+Para efectos visuales se presenta en el siguiente gráfico la serie original, la serie ajustada con el modelo de Holt dos parámetros y las predicciones con sus respectivos intervalos.
 
 ```{r}
-autoplot(pei_serie,series = "ICAP")+
-  autolayer(modfin_pei_serie$fitted[,1],series="Holt-Winters")+
-  autolayer(pred_modfin_pei_serie,series="Predicción")+
-  ggtitle("ICAP y Método de Holt-Winters más predicción")+
-  xlab("Año")+ylab("ICAP")+
-  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+autoplot(exportacion_serie,series = "Gasto de exportación")+
+  autolayer(modfin_exportacion_serie$fitted[,1],series="Holt dos parámetros")+
+  autolayer(pred_modfin_exportacion_serie,series="Predicción")+
+  ggtitle("Gasto de exportación y Estimación por el Método de Holt dos parámetros más predicción")+
+  xlab("Año")+ylab("miles de bolivianos")+
+  scale_color_manual(values=c("#A4C4FC","#E80808","#189B0D"))
 ```
 
-Para visualizar de mejor manera la predicción se tomará en cuenta los datos desde el año 2026.
+Para visualizar de mejor manera la predicción se tomará en cuenta los datos desde el año 2010.
 
 ```{r}
-autoplot(pei_serie,series = "ICAP")+
-  autolayer(modfin_pei_serie$fitted[,1],series="Holt-Winters")+
-  autolayer(pred_modfin_pei_serie,series="Predicción")+
-  ggtitle("ICAP y Método de Holt-Winters más predicción")+
-  xlab("Año")+ylab("ICAP")+
-  xlim(2016,2022)+ylim(170,222)+
-  scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
+autoplot(exportacion_serie,series = "Gasto de exportación")+
+  autolayer(modfin_exportacion_serie$fitted[,1],series="Holt dos parámetros")+
+  autolayer(pred_modfin_exportacion_serie,series="Predicción")+
+  ggtitle("Gasto de exportación y Estimación por el Método de Holt dos parámetros más predicción")+
+  xlab("Año")+ylab("miles de bolivianos")+
+  xlim(2010,2025)+
+  scale_color_manual(values=c("#A4C4FC","#E80808","#189B0D"))
 ```
 
 ## Conclusiones
 
-En esta sección se estudio la serie temporal del indice de consumo de pei potable en Bolivia desde el periodo de enero de 1990 hasta julio del 2021, teniendo en total 379 observaciones a nivel mensual, se pudo determinar la existencia de tendencia aditiva con estacionalidad bajo un análisis de gráficos.
+En esta sección se estudio la serie temporal anual del gasto en la exportación de bienes y servicios del producto interno bruto a precios constantes en Bolivia, desde el año 1980 hasta el 2020, teniendo en total 41 observaciones, se pudo determinar la existencia de tendencia creciente hasta el 2014 y a partir del 2015 decreciente.
 
-Al ajustar la serie se propuso un modelo de Holt dos parámetros y otro un modelo de Holt-Winters (suavizamiento exponencial triple), al hallar el cuadrado medio del error MSE y el porcentaje de error absoluto medio MAPE se pudo determinar y decidir que el modelo óptimo para este estudio era el Holt-Winters asumiendo así que la serie aparte de contar con tendencia adtivia también cuenta con efecto estacional.
+Al ajustar la serie se propuso para efectos de práctica un modelo de Holt y un Holt dos parámetros (suavizamiento exponencial doble), al hallar el cuadrado medio del error MSE y el porcentaje de error absoluto medio MAPE se pudo determinar y decidir que el modelo óptimo para este estudio era el Holt dos parámetros asumiendo así que la serie aparte de contar con tendencia.
 
-Una vez ajustado los datos con el modelo óptimo se hizo las predicciones a 5 meses posteriores a los conocidos teniendo un indice aproxiamdo de consumo de pei para el mes de agosto de $196.26$ y observando que probablemente el mes de noviembre sea el que mayor indice presente en estos últimos cinco meses del presente año.
+Una vez ajustado los datos con el modelo óptimo se hizo las predicciones a 5 años posteriores a los conocidos teniendo un gasto aproximado para la gestión 2021 de $9,485,586.00$ miles de bolivianos, mencionar también que los años posteriores de predicción cuentan con poca confiabilidad debido a que como se trata de una serie anual, se tiene que tomar muchos otros aspectos externos en cuenta como políticas públicas, acciones gubernamentales o tal vez crisis a nivel mundial, por tal motivo consideramos que la predicción para la gestión 2021 tendría mas probabilidad de confiabilidad.
 
 
 

@@ -20,13 +20,13 @@ La serie de tiempo esta con periodicidad mensual, comprendidos desde enero de 20
 
 La información del indicador de la inflacion de Bolivia se puede encontrar en la página oficial del Banco Central de Bolivia (BCB) ^[www.bcb.gob.bo], sección de "Información económica" y subsección "Inidcadores de Inflación". Específicamente se puede observar los datos en formato establecido por la institución del siguiente enlace: (https://www.bcb.gob.bo/?q=indicadores_inflacion).
 
-Para fines prácticos se puso la variable en estudio en formato *.txt, el cual puede ser descargado del siguiente enlace (https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/indice_consumo_de inflacion potable_mes_90_21.txt).
+Para fines prácticos se puso la variable en estudio en formato *.txt, el cual puede ser descargado del siguiente enlace (https://github.com/bladimir-morales/series_de_tiempo/blob/main/data/inflacion.txt).
 
 ## Gráfico
 
 ```{r}
 url<-"https://raw.githubusercontent.com/bladimir-morales/series_de_tiempo/main/data/inflacion.txt"
-inflacion<-read.table("./data/inflacion.txt",head=T)
+inflacion<-read.table(url,head=T)
 inflacion_serie<-ts(inflacion$inflacion,start = c(2014,1),frequency = 12)
 
 autoplot(inflacion_serie,series = "Inflación")+
@@ -35,7 +35,7 @@ autoplot(inflacion_serie,series = "Inflación")+
   scale_color_manual(values="#2B7DFF")
 ```
 
-En el gráfico visualmente se puede observar que la serie de tiempo en estudio tendría tendencia aditiva y efecto estacional. Pero para determinar de mejor forma estos efectos se hará un análisis de gráficos de tendencia y estacionalidad.
+En el gráfico visualmente se puede observar que la serie de tiempo en estudio podría tener algún tipo de tendencia y al parecer no presenta estacionalidad. Pero para determinar de mejor forma estos efectos se hará un análisis de gráficos de tendencia y estacionalidad.
 
 ### Tendencia
 
@@ -52,27 +52,27 @@ autoplot(inflacion_serie,series = "Inflación")+
   scale_color_manual(values=c("#A4C4FC","#E80808"))
 ```
 
-Con la media móvil de orden 12 se puede observar en el gráfico la tendencia aditiva de la serie de tiempo, cabe mencionar que en diciembre del 2016 a aproximadamente junio del 2017 hay una rampa decreciente que puede explicarse por un fenómeno climático de sequía y falta de lluvias en Bolivia, lo cual derivó a un desabastecimiento de inflacion en ocho de los nueve departamentos del país y en 94 barrios del departamento de La Paz existió un racionamiento de inflacion, esto se detalla de mejor manera el reportaje de CNN en español en su portal web^[https://cnnespanol.cnn.com/2016/11/21/declaran-emergencia-nacional-en-bolivia-por-sequia-y-falta-de-inflacion/].
+Con la media móvil de orden 12 se puede observar en el gráfico que posiblemente tenga una tendencia decreciente, cabe mencionar que son datos muy cercanos a cero, y en su gran parte estarían variando entre $-1$ a $1$, por tal motivo se tendria que tener bastante cuidado en asumir tendencia decreciente.
 
 ### Estacionalidad
 
 ```{r}
-ggseasonplot(inflacion_serie,main="Estacionalidad del Indice Mensual de Consumo de inflacion Potable",
-           year.labels = T,xlab="Mes",ylab="ICAP")
+ggseasonplot(inflacion_serie,main="Estacionalidad de la Inflación en Bolivia",
+           year.labels = T,xlab="Mes",ylab="Inflación")
 ```
 
-En este gráfico se puede observar que existe una tendencia creciente, ya que a medida que pasa cada año el consumo de inflacion potable va aumentando, por otro lado no se presente de manera clara el efecto estacional.
+En este gráfico se puede observar que existe los datos están alrededor de cero con poca variabilidad, es importante mencionar que en diciembre del 2019 se producio una inflación negativa significativa a comparación de los otros meses, por otro lado no se observa un comportamiento estacional.
 
 ```{r}
-monthplot(inflacion_serie,ylab="",main="Estacionalidad del Indice Mensual de Consumo de inflacion Potable",
+monthplot(inflacion_serie,ylab="",main="Estacionalidad de la Inflacion en Bolivia",
           labels = c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"),
           xlab="Mes")
 ```
 
-En este último gráfico se puede observar que podría existir un efecto estacional ya que en los meses de enero y noviembre asciende de manera muy leve el consumo de inflacion potable en Bolivia, pero en los demás meses se mantiene casi constantemente.
+En este último gráfico se puede observar que podría existir un efecto estacional ya que en cada uno de los meses existe bastante variabilidad.
 
 **Conclusión:**  
-Se puede concluir entonces con un análisis visual que la serie en estudio del indice de consumo de inflacion potable en Bolivia tiene efecto de tendencia aditiva con una posible estacionalidad.
+Se puede concluir entonces con un análisis visual que la serie en estudio de la inflación en Boliviano cuenta con tendencia marcada y posiblemente presente estacionalidad.
 
 ## Datos de entrenamiento y test
 
@@ -80,11 +80,11 @@ Para efecto de obtener un modelo óptimo y lo más preciso posible, se dividirá
 
 * Conjunto de datos de entrenamiento: 
 
-Se tomará en cuenta los datos desde enero de 1990 hasta diciembre de 2019, contando con 360 observaciones.
+Se tomará en cuenta los datos desde enero de 2014 hasta diciembre de 2020, contando con 84 observaciones.
 
 * Conjunto de datos de test.
 
-Se tomará en cuenta los datos desde enero de 2020 hasta julio de 2021, contando con 19 observaciones.
+Se tomará en cuenta los datos desde enero de 2021 hasta septiembre de 2021, contando con 9 observaciones.
 
 En el siguiente gráfico se puede observar la serie de entrenamiento y de test.
 
@@ -101,13 +101,13 @@ autoplot(inflacion_serie_ent,series = "Inflación \nentrenamiento")+
 
 ## Estimación
 
-Se estimaran dos modelos posibles para el conjunto de datos de entrenamiento, tomando en cuenta que nuestra serie de tiempo como se pudo concluir tiene tendencia aditiva y posiblemente estacionalidad.
+Se estimaran dos modelos posibles para el conjunto de datos de entrenamiento, tomando en cuenta que nuestra serie de tiempo como se pudo observar posiblemente tiene tendencia y estacionalidad.
 
 ### Modelo 1
 
-Para este primer modelo, se estimarán los datos con el método de Holt dos parámetros o también llamado suavizamiento exponencial doble, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente no tiene estacionalidad. 
+Para este primer modelo, se estimarán los datos con el método de Holt o también llamado suavizamiento exponencial simple, donde se descartaria que la serie tenga tendencia y estacionalidad. 
 
-La estimación se hará estimando dos parámetros de suavizamiento $\alpha$ y $\beta$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$ y $\beta$.
+La estimación se hará estimando un parámetros de suavizamiento $\alpha$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$.
 
 ```{r}
 mod1_inflacion_serie_ent<-HoltWinters(inflacion_serie_ent,beta=F,gamma = F)
@@ -116,12 +116,12 @@ mod1_inflacion_serie_ent
 
 ### Modelo 2
 
-Para este segundo modelo, se estimarán los datos con el método de Holt-Winters o también llamado suavizamiento exponencial triple, esto debido a que la serie de tiempo cuenta con tendencia aditiva y posiblemente estacionalidad.
+Para este segundo modelo, se estimarán los datos con el método de Holt-Winters o también llamado suavizamiento exponencial triple, esto debido a que la serie de tiempo posiblemente cuente con tendencia decreciente y estacionalidad.
 
 La estimación se hará estimando tres parámetros de suavizamiento $\alpha$, $\beta$ y $\gamma$. El software R cuenta con la función $HoltWinters()$ que encuentra los valores óptimos de los parámetros, en este caso para el $\alpha$, $\beta$ y $\gamma$.
 
 ```{r}
-mod2_inflacion_serie_ent<-HoltWinters(inflacion_serie_ent,gamma = F)
+mod2_inflacion_serie_ent<-HoltWinters(inflacion_serie_ent)
 mod2_inflacion_serie_ent
 ```
 
@@ -132,124 +132,134 @@ Se calculará el cuadrado medio del error MSE y el Porcentaje de error absoluto 
 
 ### Cuadrado Medio del Error MSE
 
-**Modelo 1. Modelo Holt dos parámetros**
+**Modelo 1. Modelo Holt (suavizamiento exponencial simple)**
 
 ```{r}
 mse1<-mod1_inflacion_serie_ent$SSE/length(mod1_inflacion_serie_ent$x)
+mse1
 ```
 
-Para el modelo de Holt dos parámetros el cuadrado medio del error MSE es igual a `r mse1`
+Para el modelo de Holt el cuadrado medio del error MSE es igual a `r mse1`
 
-**Modelo 2. Modelo Holt-Winters**
+**Modelo 2. Modelo Holt-Winters (suavizamiento exponencial triple)**
 
 ```{r}
 mse2<-mod2_inflacion_serie_ent$SSE/length(mod2_inflacion_serie_ent$x)
+mse2
 ```
 
 Para el modelo de Holt-Winters el cuadrado medio del error MSE es igual a `r mse2`
 
 ### Porcentaje de error absoluto medio MAPE
 
-**Modelo 1. Modelo Holt dos parámetros**
+**Modelo 1. Modelo Holt (suavizamiento exponencial simple)**
 
 ```{r}
 mape1<-mape(mod1_inflacion_serie_ent$x,mod1_inflacion_serie_ent$fitted[,1])
+mape1
 ```
 
-Para el modelo de Holt dos parámetros el porcentaje de error absoluto MAPE es igual a `r mape1`
+Para el modelo de Holt el porcentaje de error absoluto MAPE es igual a `r mape1`
 
-**Modelo 2. Modelo Holt-Winters**
+**Modelo 2. Modelo Holt-Winters (suavizamiento exponencial triple)**
 
 ```{r}
 mape2<-mape(mod2_inflacion_serie_ent$x,mod2_inflacion_serie_ent$fitted[,1])
+mape2
 ```
 
 Para el modelo de Holt-Winters el porcentaje de error absoluto MAPE es igual a `r mape2`
 
 ### Decisión de modelo apropiado
 
-Como se pudo observar el MSE y el MAPE del modelo Holt-Winters es menor al del modelo de Holt dos parámetros, por tal motivo nos quedamos con el modelo de suavizamiento exponencial triple.
+Como se pudo observar el MSE y el MAPE del modelo Holt es menor al del modelo de Holt-Winters, por tal motivo se decide modelar la serie de tiempo con el modelo de suavizamiento exponencial simple.
 
 ## Gráfico de la serie observada y ajustada
 
-Para el siguiente gráfico se utilizará el modelo de Holt-Winters para ajustar la serie de tiempo del conjunto de entrenamiento.
+Para el siguiente gráfico se utilizará el modelo de Holt para ajustar la serie de tiempo del conjunto de entrenamiento.
 
 ```{r}
 autoplot(inflacion_serie,series = "Inflación")+
   autolayer(mod1_inflacion_serie_ent$fitted[,1],series="Holt")+
-  ggtitle("Inflación y Método de Holt")+
+  ggtitle("Inflación y Estimación con el Método de Holt")+
   xlab("Año")+ylab("Inflación")+
   scale_color_manual(values=c("#FF0000","#A4C4FC"))
 ```
 
 ## Predicción para datos de test
 
-Con el modelo de Holt-Winters se predicirá los 19 datos restantes del conjunto de test a partir de los datos de entrenamiento. Con el software R se halla estos datos de predicción con sus respectivos intervalos de confianza.
+Con el modelo de Holt se predicirá los 9 datos restantes del conjunto de test a partir de los datos de entrenamiento. Con el software R se halla estos con sus respectivos intervalos.
 
 ```{r}
-pred_mod1_inflacion_serie_ent<-forecast(mod1_inflacion_serie_ent,21)
+pred_mod1_inflacion_serie_ent<-forecast(mod1_inflacion_serie_ent,9)
 summary(pred_mod1_inflacion_serie_ent)
 ```
 
-En el siguiente gráfico se puede observar de mejor manera los datos de predicción del conjunto de test, así también el conjunto de entrenamiento y test de la serie de tiempo en estudio.
+En el siguiente gráfico se puede observar de mejor manera los datos de predicción del conjunto de test, el conjunto de entrenamiento y  el conjunto de test de la serie de tiempo en estudio.
 
 ```{r}
 autoplot(inflacion_serie,series = "Inflación")+
   autolayer(mod1_inflacion_serie_ent$fitted[,1],series="Holt")+
   autolayer(pred_mod1_inflacion_serie_ent$mean,series="Predicción")+
-  ggtitle("Inflación y Método de Holt más predicción")+
+  ggtitle("Inflación y Estimación con el Método de Holt más predicción")+
   xlab("Año")+ylab("Inflación")+
   scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
 ```
 
 ## MAPE para datos de test
 
-Ahora se hallará el porcentaje de error absoluto medio MAPE de los datos de test con los datos de predicción a partir del modelo de Holt-Winters.
+Ahora se hallará el porcentaje de error absoluto medio MAPE de los datos de test con los datos de predicción a partir del modelo de Holt.
 
 ```{r}
 mape_test<-mape(inflacion_serie_test,pred_mod1_inflacion_serie_ent$mean)
+mape_test
 ```
 
-El MAPE para el conjunto de test es igual a `r mape_test`, se puede ver que es mayor al MAPE del conjunto de entrenamiento (`r mape2`). Esto puede ser respuesta a que en estos últimos meses de la serie de tiempo existió mayor variabilidad en los datos como se pudo ver en el gráfico anterior.
+El MAPE para el conjunto de test es igual a `r mape_test`, se puede ver que es mayor al MAPE del conjunto de entrenamiento (`r mape1`). Esto puede ser respuesta a que los pocos datos que se están calculando.
 
 
 ## Predicción final
 
-Finalmente se considerará todas las observaciones de la serie de tiempo del indice del consumo de inflacion potable en Bolivia para poder predecir 5 meses adelante, vale decir del mes de agosto a diciembre del 2021.
+Finalmente se considerará todas las observaciones de la serie de tiempo de la inflación en Bolivia, para poder predecir 5 meses adelante, vale decir del mes de octubre del 2021 a febrero del 2022.
 
 ```{r}
 modfin_inflacion_serie<-HoltWinters(inflacion_serie,beta = F,gamma = F)
+modfin_inflacion_serie
+```
+
+
+```{r}
 pred_modfin_inflacion_serie<-forecast(modfin_inflacion_serie,5)
 ```
 
-También se puede obtener con el softare R un resumen del modelo aplicado en este caso Holt-Winters.
+También se puede obtener con el softare R un resumen del modelo aplicado en este caso Holt.
 
 ```{r}
 summary(pred_modfin_inflacion_serie)
 ```
 
-Se puede observar que el MAPE bajo el modelo de Holt-Winters de todas las observaciones sube es mayor que el MAPE de los datos de entrenamiento con una diferencia de $0.16816$ puntos porcentuales. 
+Se puede observar que el MAPE bajo el modelo de Holt de todas las observaciones es mayor que el MAPE de los datos de entrenamiento con una diferencia de $5.2038$ puntos porcentuales. 
 
-Por lo tanto se esperaría que para el mes de agosto se tenga un indice de consumo de inflacion potable en Bolivia de $196.26$, teniendo como punto máximo de consumo en el mes de noviembre.
+Por lo tanto se esperaría que para el mes de octubre del 2021 se tenga una inflación en Bolivia de $0.1252133$.
 
-Para efectos visuales se presenta en el siguiente gráfico la serie original, la serie ajustada con el modelo de Holt-Winters y las predicciones con sus respectivos intervalos.
+Para efectos visuales se presenta en el siguiente gráfico la serie original, la serie ajustada con el modelo de Holt y las predicciones con sus respectivos intervalos.
 
 ```{r}
 autoplot(inflacion_serie,series = "Inflación")+
   autolayer(modfin_inflacion_serie$fitted[,1],series="Holt")+
   autolayer(pred_modfin_inflacion_serie,series="Predicción")+
-  ggtitle("Inflación y Método de Holt más predicción")+
+  ggtitle("Inflación y Estimación con el Método de Holt más predicción")+
   xlab("Año")+ylab("Inflación")+
   scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
 ```
 
-Para visualizar de mejor manera la predicción se tomará en cuenta los datos desde el año 2026.
+Para visualizar de mejor manera la predicción se tomará en cuenta los datos desde el año 2020.
 
 ```{r}
 autoplot(inflacion_serie,series = "Inflación")+
   autolayer(modfin_inflacion_serie$fitted[,1],series="Holt-Winters")+
   autolayer(pred_modfin_inflacion_serie,series="Predicción")+
-  ggtitle("Inflación y Método de Holt-Winters más predicción")+
+  ggtitle("Inflación y Estimación con el Método de Holt-Winters más predicción")+
   xlab("Año")+ylab("Inflación")+
   xlim(2020,2022.1)+
   scale_color_manual(values=c("#E80808","#A4C4FC","#189B0D"))
@@ -257,11 +267,11 @@ autoplot(inflacion_serie,series = "Inflación")+
 
 ## Conclusiones
 
-En esta sección se estudio la serie temporal del indice de consumo de inflacion potable en Bolivia desde el periodo de enero de 1990 hasta julio del 2021, teniendo en total 379 observaciones a nivel mensual, se pudo determinar la existencia de tendencia aditiva con estacionalidad bajo un análisis de gráficos.
+En esta sección se estudio la serie temporal de la inflación en Bolivia desde el periodo de enero de 2014 hasta septiembre del 2021, teniendo en total 93 observaciones con periodicidad mensual, se pudo determinar que se presume tener una tendencia decreciente leve y efecto de estacionalidad. .
 
-Al ajustar la serie se propuso un modelo de Holt dos parámetros y otro un modelo de Holt-Winters (suavizamiento exponencial triple), al hallar el cuadrado medio del error MSE y el porcentaje de error absoluto medio MAPE se pudo determinar y decidir que el modelo óptimo para este estudio era el Holt-Winters asumiendo así que la serie aparte de contar con tendencia adtivia también cuenta con efecto estacional.
+Al ajustar la serie se propuso un modelo de Holt (suavizamiento exponencial simple)y un modelo de Holt-Winters (suavizamiento exponencial triple), al hallar el cuadrado medio del error MSE y el porcentaje de error absoluto medio MAPE para los datos de entrenamiento se pudo determinar y decidir que el modelo óptimo para este estudio es el de Holt, asumiendo así que la serie no cuenta con tendencia y tampoco con efecto estacional.
 
-Una vez ajustado los datos con el modelo óptimo se hizo las predicciones a 5 meses posteriores a los conocidos teniendo un indice aproxiamdo de consumo de inflacion para el mes de agosto de $196.26$ y observando que probablemente el mes de noviembre sea el que mayor indice presente en estos últimos cinco meses del presente año.
+Una vez ajustado los datos con el modelo óptimo se hizo las predicciones a 5 meses posteriores a los conocidos teniendo una inflación para el mes de octubre de de $0.1252133$, lo cual representaría una leve inflación para ese mes a nivel nacional.
 
 
 
